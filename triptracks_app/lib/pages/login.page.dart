@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:triptracks_app/widgets/inputs/primary_button.widget.dart';
+import 'package:triptracks_app/widgets/inputs/primary_text_button.widget.dart';
+import 'package:triptracks_app/widgets/inputs/single_text_field.widget.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -25,17 +28,15 @@ class _LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            TextField(
+            SingleTextField(
               keyboardType: TextInputType.emailAddress,
               maxLength: 512,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(), hintText: "Email"),
+              hintText: "Email",
             ),
-            TextField(
+            SingleTextField(
               keyboardType: TextInputType.visiblePassword,
               maxLength: 16,
-              decoration: InputDecoration(
-                  border: OutlineInputBorder(), hintText: "Password"),
+              hintText: "Password",
             ),
             Padding(
               padding: EdgeInsets.all(10.0),
@@ -43,21 +44,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  ElevatedButton(
+                  PrimaryButton(
+                    buttonText: "Login",
                     onPressed: handleOnLogin,
-                    style: ButtonStyle(
-                        minimumSize: MaterialStatePropertyAll(Size(100, 50))),
-                    child: Text(
-                      "Login",
-                      style: TextStyle(fontSize: 15),
-                    ),
                   ),
                   SizedBox(
                     height: 10.0,
                   ),
-                  TextButton(
+                  PrimaryTextButton(
+                    buttonText: "Don't have an account?",
                     onPressed: handleOnRegister,
-                    child: Text("Don't have an account?"),
                   ),
                 ],
               ),
