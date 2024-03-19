@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:triptracks_app/widgets/inputs/primary_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/primary_text_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/single_text_field.widget.dart';
@@ -12,11 +13,11 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   static void handleOnLogin() {
-    print("Login button pressed");
+    Get.offNamed('/');
   }
 
   static void handleOnRegister() {
-    print("Don't have account button pressed");
+    Get.toNamed("/register");
   }
 
   @override
@@ -45,7 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   PrimaryButton(
-                    buttonText: "Login",
+                    buttonText: "LOGIN",
                     onPressed: handleOnLogin,
                   ),
                   SizedBox(
