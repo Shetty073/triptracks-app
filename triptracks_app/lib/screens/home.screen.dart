@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:triptracks_app/common/constants.common.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -10,11 +11,20 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Padding(
-        padding: EdgeInsets.fromLTRB(10.0, 0, 10.0, 0),
-        child: Column(
-          children: [Text("Home Screen")],
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(11.0, 0, 11.0, 0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: SizeConstants.logicalHeight,
+            ),
+            child: const Column(
+              children: [
+                Text("Home Screen"),
+              ],
+            ),
+          ),
         ),
       ),
     );

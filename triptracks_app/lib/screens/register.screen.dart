@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:triptracks_app/common/constants.common.dart';
 import 'package:triptracks_app/common/utils.common.dart';
 import 'package:triptracks_app/models/user.model.dart';
 import 'package:triptracks_app/services/auth.service.dart';
@@ -67,9 +68,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-          child: Container(
-        height: MediaQuery.of(context).size.height,
-        child: SingleChildScrollView(
+          child: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(11.0, 0, 11.0, 0),
+        child: ConstrainedBox(
+          constraints: BoxConstraints(
+            minHeight: SizeConstants.logicalHeight,
+          ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
