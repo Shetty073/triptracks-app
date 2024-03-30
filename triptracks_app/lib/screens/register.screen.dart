@@ -7,6 +7,8 @@ import 'package:triptracks_app/services/auth.service.dart';
 import 'package:triptracks_app/widgets/inputs/primary_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/primary_text_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/single_text_field.widget.dart';
+import 'package:triptracks_app/widgets/loaders/spinner.widget.dart';
+import 'package:triptracks_app/widgets/popups/pop_snack.widget.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,6 +25,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController confirmPasswordController;
   late AuthService authService;
   bool _registerButtonEnabled = false;
+  bool _isloading = false;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -59,13 +62,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (password == confirmPassword) {
         User user = User(name: name, email: email, password: password);
-        User? rUser = authService.register(user);
-        if (rUser != null) {
-          Get.offNamed('/');
-        }
-      }
+        Future<User?> authUser = authService.register(user);
 
-      Get.offNamed('/');
+        authUser.then(
+          (user) => {
+            if (user != null)
+              {
+                popSnack(
+                  title: "Welcome ${user.name}",
+                ),
+                Get.offNamed('/'),
+              }
+            else
+              {
+                popSnack(
+                  title: "Error Logging In",
+                  message: "Something went wrong...",
+                  isError: true,
+                ),
+                setState(() {
+                  _isloading = false;
+                }),
+              },
+          },
+        );
+      } else {
+        popSnack(
+          title: "Password Mismatch",
+          message:
+              "Passwords do not match please re-enter and confirm password",
+          isError: true,
+        );
+      }
     }
   }
 
@@ -90,71 +118,79 @@ class _RegisterScreenState extends State<RegisterScreen> {
             ),
             child: Form(
               key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  SingleTextField(
-                    keyboardType: TextInputType.text,
-                    editingController: nameController,
-                    maxLength: 128,
-                    hintText: "Name",
-                    onEditingComplete: handleEditingConplete,
-                  ),
-                  SingleTextField(
-                    keyboardType: TextInputType.emailAddress,
-                    editingController: emailController,
-                    maxLength: 512,
-                    hintText: "Email",
-                    validator: emailValidator,
-                    onEditingComplete: handleEditingConplete,
-                  ),
-                  SingleTextField(
-                    keyboardType: TextInputType.number,
-                    editingController: otpController,
-                    maxLength: 6,
-                    hintText: "OTP",
-                    onEditingComplete: handleEditingConplete,
-                  ),
-                  SingleTextField(
-                    keyboardType: TextInputType.visiblePassword,
-                    editingController: passwordController,
-                    maxLength: 16,
-                    hintText: "Password",
-                    validator: passwordValidator,
-                    onEditingComplete: handleEditingConplete,
-                  ),
-                  SingleTextField(
-                    keyboardType: TextInputType.visiblePassword,
-                    editingController: confirmPasswordController,
-                    maxLength: 16,
-                    hintText: "Confirm Password",
-                    validator: passwordValidator,
-                    onEditingComplete: handleEditingConplete,
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.all(10.0),
-                    child: Column(
+              child: _isloading
+                  ? const Spinner()
+                  : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        PrimaryButton(
-                          buttonText: "REGISTER",
-                          onPressed:
-                              _registerButtonEnabled ? handleOnRegister : null,
+                        SingleTextField(
+                          keyboardType: TextInputType.text,
+                          editingController: nameController,
+                          maxLength: 128,
+                          hintText: "Name",
+                          textInputAction: TextInputAction.next,
+                          onEditingComplete: handleEditingConplete,
                         ),
-                        const SizedBox(
-                          height: 10.0,
+                        SingleTextField(
+                          keyboardType: TextInputType.emailAddress,
+                          editingController: emailController,
+                          maxLength: 512,
+                          hintText: "Email",
+                          validator: emailValidator,
+                          textInputAction: TextInputAction.next,
+                          onEditingComplete: handleEditingConplete,
                         ),
-                        const PrimaryTextButton(
-                          buttonText: "Already have an account?",
-                          onPressed: handleOnLogin,
+                        SingleTextField(
+                          keyboardType: TextInputType.number,
+                          editingController: otpController,
+                          maxLength: 6,
+                          hintText: "OTP",
+                          textInputAction: TextInputAction.done,
+                          onEditingComplete: handleEditingConplete,
+                        ),
+                        SingleTextField(
+                          keyboardType: TextInputType.visiblePassword,
+                          editingController: passwordController,
+                          maxLength: 16,
+                          hintText: "Password",
+                          validator: passwordValidator,
+                          textInputAction: TextInputAction.next,
+                          onEditingComplete: handleEditingConplete,
+                        ),
+                        SingleTextField(
+                          keyboardType: TextInputType.visiblePassword,
+                          editingController: confirmPasswordController,
+                          obscureText: true,
+                          maxLength: 16,
+                          hintText: "Confirm Password",
+                          validator: passwordValidator,
+                          onEditingComplete: handleEditingConplete,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              PrimaryButton(
+                                buttonText: "REGISTER",
+                                onPressed: _registerButtonEnabled
+                                    ? handleOnRegister
+                                    : null,
+                              ),
+                              const SizedBox(
+                                height: 10.0,
+                              ),
+                              const PrimaryTextButton(
+                                buttonText: "Already have an account?",
+                                onPressed: handleOnLogin,
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
         ),

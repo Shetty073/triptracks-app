@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
@@ -22,8 +23,8 @@ class NetworkHelper {
     ));
   }
 
-  Future<dynamic> request(String endpoint, HttpMethod method,
-      {dynamic data}) async {
+  Future<dynamic> request(
+      String endpoint, HttpMethod method, dynamic data) async {
     try {
       late Response response;
       switch (method) {
@@ -31,17 +32,20 @@ class NetworkHelper {
           response = await _dio.get(endpoint);
           break;
         case HttpMethod.post:
-          response = await _dio.post(endpoint, data: data);
+          response = await _dio.post(endpoint, data: jsonEncode(data));
           break;
         case HttpMethod.put:
-          response = await _dio.put(endpoint, data: data);
+          response = await _dio.put(endpoint, data: jsonEncode(data));
           break;
         case HttpMethod.delete:
           response = await _dio.delete(endpoint);
           break;
       }
 
-      if (response.statusCode == 200) {
+      if (response.statusCode! >= 200 && response.statusCode! < 300) {
+        return response.data;
+      } else if (response.statusCode == 401) {
+        // TODO: Add handling of 401
         return response.data;
       } else {
         throw Exception(

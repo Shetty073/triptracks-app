@@ -21,6 +21,8 @@ class ErrorMessageConstants {
 
 class UrlConstants {
   static const String backendBaseUrl = "https://jsonplaceholder.typicode.com";
+  static const String register = "/posts";
+  static const String login = "/posts";
 }
 
 class SizeConstants {
