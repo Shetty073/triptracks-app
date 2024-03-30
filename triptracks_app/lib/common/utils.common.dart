@@ -23,7 +23,7 @@ String? passwordValidator(String? password) {
       RegExp(RegexConstants.passwordPatternRegex).hasMatch(password ?? "");
 
   if (!validEmailPattern) {
-    return ErrorMessageConstants.emailInvalid;
+    return ErrorMessageConstants.passwordInvalid;
   }
 
   return null;

@@ -8,13 +8,15 @@ class RegexConstants {
   static const String emailDomainRegex =
       r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9]+\.[a-zA-Z]+$";
   static const String passwordPatternRegex =
-      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,}$';
+      r'^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,12}$';
 }
 
 class ErrorMessageConstants {
   static const String emailInvalid = "Please enter a valid email address";
   static const String emailDomainInvalid =
       "Supported domains: gmail.com, outlook.com, yahoo.com, icloud.com, aol.com, protonmail.com, zoho.com, gmx.com, yandex.com, mail.com";
+  static const String passwordInvalid =
+      "Password should be of 8-12 characters with atleast 1 uppercase letter, 1 digit and no whitespaces";
 }
 
 class UrlConstants {

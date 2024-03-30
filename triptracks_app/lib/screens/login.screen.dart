@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:triptracks_app/common/constants.common.dart';
+import 'package:triptracks_app/common/utils.common.dart';
 import 'package:triptracks_app/widgets/inputs/primary_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/primary_text_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/single_text_field.widget.dart';
@@ -13,12 +14,44 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  static void handleOnLogin() {
-    Get.offNamed('/');
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  bool _loginButtonEnabled = false;
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    super.initState();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+  }
+
+  void handleOnLogin() {
+    if (_formKey.currentState!.validate()) {
+      // TODO: Perform login operations
+
+      Get.offNamed('/');
+    }
   }
 
   static void handleOnRegister() {
     Get.toNamed("/register");
+  }
+
+  void handleEditingConplete() {
+    FocusManager.instance.primaryFocus?.nextFocus();
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _loginButtonEnabled = true;
+      });
+    }
   }
 
   @override
@@ -31,41 +64,52 @@ class _LoginScreenState extends State<LoginScreen> {
             constraints: BoxConstraints(
               minHeight: SizeConstants.logicalHeight,
             ),
-            child: const Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                SingleTextField(
-                  keyboardType: TextInputType.emailAddress,
-                  maxLength: 512,
-                  hintText: "Email",
-                ),
-                SingleTextField(
-                  keyboardType: TextInputType.visiblePassword,
-                  maxLength: 16,
-                  hintText: "Password",
-                ),
-                Padding(
-                  padding: EdgeInsets.all(10.0),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      PrimaryButton(
-                        buttonText: "LOGIN",
-                        onPressed: handleOnLogin,
-                      ),
-                      SizedBox(
-                        height: 10.0,
-                      ),
-                      PrimaryTextButton(
-                        buttonText: "Don't have an account?",
-                        onPressed: handleOnRegister,
-                      ),
-                    ],
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SingleTextField(
+                    keyboardType: TextInputType.emailAddress,
+                    editingController: emailController,
+                    maxLength: 512,
+                    hintText: "Email",
+                    validator: emailValidator,
+                    textInputAction: TextInputAction.next,
+                    onEditingComplete: handleEditingConplete,
                   ),
-                ),
-              ],
+                  SingleTextField(
+                    keyboardType: TextInputType.visiblePassword,
+                    editingController: passwordController,
+                    obscureText: true,
+                    maxLength: 16,
+                    hintText: "Password",
+                    validator: passwordValidator,
+                    onEditingComplete: handleEditingConplete,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        PrimaryButton(
+                          buttonText: "LOGIN",
+                          onPressed: _loginButtonEnabled ? handleOnLogin : null,
+                        ),
+                        const SizedBox(
+                          height: 10.0,
+                        ),
+                        const PrimaryTextButton(
+                          buttonText: "Don't have an account?",
+                          onPressed: handleOnRegister,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

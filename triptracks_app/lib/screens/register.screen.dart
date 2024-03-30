@@ -23,6 +23,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   late TextEditingController confirmPasswordController;
   late AuthService authService;
   bool _registerButtonEnabled = false;
+  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -50,17 +51,30 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void handleOnRegister() {
-    String name = nameController.text;
-    String email = emailController.text;
-    String password = passwordController.text;
-    String confirmPassword = confirmPasswordController.text;
+    if (_formKey.currentState!.validate()) {
+      String name = nameController.text;
+      String email = emailController.text;
+      String password = passwordController.text;
+      String confirmPassword = confirmPasswordController.text;
 
-    if (password == confirmPassword) {
-      User user = User(name: name, email: email, password: password);
-      User? rUser = authService.register(user);
-      if (rUser != null) {
-        Get.offNamed('/');
+      if (password == confirmPassword) {
+        User user = User(name: name, email: email, password: password);
+        User? rUser = authService.register(user);
+        if (rUser != null) {
+          Get.offNamed('/');
+        }
       }
+
+      Get.offNamed('/');
+    }
+  }
+
+  void handleEditingConplete() {
+    FocusManager.instance.primaryFocus?.nextFocus();
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _registerButtonEnabled = true;
+      });
     }
   }
 
@@ -68,75 +82,83 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-          child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(11.0, 0, 11.0, 0),
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            minHeight: SizeConstants.logicalHeight,
-          ),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SingleTextField(
-                keyboardType: TextInputType.text,
-                maxLength: 128,
-                hintText: "Name",
-                validator: emailValidator,
-                editingController: nameController,
-              ),
-              SingleTextField(
-                keyboardType: TextInputType.emailAddress,
-                maxLength: 512,
-                hintText: "Email",
-                validator: emailValidator,
-                editingController: emailController,
-              ),
-              SingleTextField(
-                keyboardType: TextInputType.number,
-                maxLength: 6,
-                hintText: "OTP",
-                editingController: otpController,
-              ),
-              SingleTextField(
-                keyboardType: TextInputType.visiblePassword,
-                maxLength: 16,
-                hintText: "Password",
-                editingController: passwordController,
-                validator: passwordValidator,
-              ),
-              SingleTextField(
-                keyboardType: TextInputType.visiblePassword,
-                maxLength: 16,
-                hintText: "Confirm Password",
-                editingController: confirmPasswordController,
-                validator: passwordValidator,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    PrimaryButton(
-                      buttonText: "REGISTER",
-                      onPressed:
-                          _registerButtonEnabled ? handleOnRegister : null,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(11.0, 0, 11.0, 0),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: SizeConstants.logicalHeight,
+            ),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  SingleTextField(
+                    keyboardType: TextInputType.text,
+                    editingController: nameController,
+                    maxLength: 128,
+                    hintText: "Name",
+                    onEditingComplete: handleEditingConplete,
+                  ),
+                  SingleTextField(
+                    keyboardType: TextInputType.emailAddress,
+                    editingController: emailController,
+                    maxLength: 512,
+                    hintText: "Email",
+                    validator: emailValidator,
+                    onEditingComplete: handleEditingConplete,
+                  ),
+                  SingleTextField(
+                    keyboardType: TextInputType.number,
+                    editingController: otpController,
+                    maxLength: 6,
+                    hintText: "OTP",
+                    onEditingComplete: handleEditingConplete,
+                  ),
+                  SingleTextField(
+                    keyboardType: TextInputType.visiblePassword,
+                    editingController: passwordController,
+                    maxLength: 16,
+                    hintText: "Password",
+                    validator: passwordValidator,
+                    onEditingComplete: handleEditingConplete,
+                  ),
+                  SingleTextField(
+                    keyboardType: TextInputType.visiblePassword,
+                    editingController: confirmPasswordController,
+                    maxLength: 16,
+                    hintText: "Confirm Password",
+                    validator: passwordValidator,
+                    onEditingComplete: handleEditingConplete,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(10.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        PrimaryButton(
+                          buttonText: "REGISTER",
+                          onPressed:
+                              _registerButtonEnabled ? handleOnRegister : null,
+                        ),
+                        const SizedBox(
+                          height: 10.0,
+                        ),
+                        const PrimaryTextButton(
+                          buttonText: "Already have an account?",
+                          onPressed: handleOnLogin,
+                        ),
+                      ],
                     ),
-                    const SizedBox(
-                      height: 10.0,
-                    ),
-                    const PrimaryTextButton(
-                      buttonText: "Already have an account?",
-                      onPressed: handleOnLogin,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
-      )),
+      ),
     );
   }
 }
