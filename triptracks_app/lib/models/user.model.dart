@@ -7,5 +7,13 @@ class User {
   final String? password;
   final String? confirmPassword;
 
-  const User({this.id, this.userName, this.firstName, this.lastName, this.email, this.password, this.confirmPassword});
+  const User({
+    this.id,
+    this.userName,
+    this.firstName,
+    this.lastName,
+    this.email,
+    this.password,
+    this.confirmPassword,
+  });
 }

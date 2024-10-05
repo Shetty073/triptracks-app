@@ -47,15 +47,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (token != null && token != "") {
       Get.offNamed("/");
-
     } else {
       setState(() {
         _isLoading = false;
-
       });
-
     }
-
   }
 
   void handleOnLogin() {
@@ -66,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
       setState(() {
         _isLoading = true;
       });
-      
+
       Future<User?> authUser = authService.login(email, password);
       authUser.then(
         (user) => {

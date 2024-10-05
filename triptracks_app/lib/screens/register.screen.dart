@@ -65,8 +65,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
       String confirmPassword = confirmPasswordController.text;
 
       if (password == confirmPassword) {
-        User user = User(firstName: firstName, lastName: lastName,
-            email: email, password: password, confirmPassword: confirmPassword);
+        User user = User(
+          firstName: firstName,
+          lastName: lastName,
+          email: email,
+          password: password,
+          confirmPassword: confirmPassword,
+        );
         Future<bool?> userRegistration = authService.register(user);
 
         userRegistration.then(
@@ -74,7 +79,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             if (registered == true)
               {
                 Get.offNamed('/login'),
-
               }
             else
               {
@@ -86,7 +90,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 setState(() {
                   _isloading = false;
                 }),
-
               },
           },
         );

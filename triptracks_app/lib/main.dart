@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:triptracks_app/screens/home.screen.dart';
 import 'package:triptracks_app/screens/login.screen.dart';
+import 'package:triptracks_app/screens/plan_trip.screen.dart';
 import 'package:triptracks_app/screens/register.screen.dart';
 
 void main() {
@@ -51,7 +52,12 @@ class MyApp extends StatelessWidget {
           name: '/register',
           page: () => const RegisterScreen(),
           transition: Transition.fadeIn,
-        )
+        ),
+        GetPage(
+          name: '/plan_trip',
+          page: () => const PlanTripScreen(),
+          transition: Transition.fadeIn,
+        ),
       ],
     );
   }

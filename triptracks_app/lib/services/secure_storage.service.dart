@@ -1,10 +1,10 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SecureStorageService {
-
   SecureStorageService._privateConstructor();
 
-  static final SecureStorageService _instance = SecureStorageService._privateConstructor();
+  static final SecureStorageService _instance =
+      SecureStorageService._privateConstructor();
 
   static SecureStorageService get instance => _instance;
 
@@ -13,8 +13,8 @@ class SecureStorageService {
   );
 
   static AndroidOptions _getAndroidOptions() => const AndroidOptions(
-    encryptedSharedPreferences: true,
-  );
+        encryptedSharedPreferences: true,
+      );
 
   Future<void> saveKey(String key, String value) async {
     try {

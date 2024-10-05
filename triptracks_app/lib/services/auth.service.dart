@@ -15,10 +15,9 @@ class AuthService {
 
   Future<User?> login(String email, password) async {
     try {
-      // var payload = {"email": email, "password": password};
       var payload = {
         "email": email,
-        "password": password
+        "password": password,
       };
 
       var response = await networkHelper.request(
@@ -36,14 +35,11 @@ class AuthService {
           email: userData["email"],
           firstName: userData["first_name"],
           lastName: userData["last_name"],
-          userName: userData["username"]
+          userName: userData["username"],
         );
-
       } else {
         return null;
-
       }
-
     } catch (e) {
       e.printError();
       popSnack(
@@ -52,9 +48,7 @@ class AuthService {
         isError: true,
       );
       return null;
-
     }
-
   }
 
   Future<bool?> register(User user) async {
@@ -72,12 +66,9 @@ class AuthService {
 
       if (response != null && response["success"] == true) {
         return true;
-
       } else {
         return false;
-
       }
-
     } catch (e) {
       e.printError();
       e.printInfo();
@@ -87,9 +78,6 @@ class AuthService {
         isError: true,
       );
       return false;
-
     }
-
   }
-
 }

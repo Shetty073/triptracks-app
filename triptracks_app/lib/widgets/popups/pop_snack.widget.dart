@@ -11,12 +11,24 @@ SnackbarController popSnack({
     title,
     message,
     snackPosition: snackPosition,
-    colorText: isError ? Colors.red : Colors.black,
-    backgroundGradient: const LinearGradient(
-      colors: [
-        Colors.deepPurple,
-        Colors.deepPurpleAccent,
-      ],
-    ),
+    colorText: Colors.white,
+    backgroundGradient: isError
+        ? const LinearGradient(
+            colors: [
+              Colors.deepOrange,
+              Colors.deepOrangeAccent,
+              Colors.red,
+              Colors.redAccent,
+            ],
+          )
+        : const LinearGradient(
+            colors: [
+              Colors.deepPurple,
+              Colors.deepPurpleAccent,
+            ],
+          ),
+    backgroundColor: isError
+        ? Colors.deepOrange.withOpacity(0.8)
+        : Colors.deepPurple.withOpacity(0.8),
   );
 }
