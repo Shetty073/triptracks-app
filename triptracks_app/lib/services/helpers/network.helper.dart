@@ -44,6 +44,9 @@ class NetworkHelper {
 
       if (response.statusCode! >= 200 && response.statusCode! < 300) {
         return response.data;
+      } else if (response.statusCode == 400) {
+        // TODO: Add handling of 400
+        return response.data;
       } else if (response.statusCode == 401) {
         // TODO: Add handling of 401
         return response.data;

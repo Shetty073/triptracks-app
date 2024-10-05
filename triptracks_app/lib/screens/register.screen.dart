@@ -18,7 +18,8 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  late TextEditingController nameController;
+  late TextEditingController firstNameController;
+  late TextEditingController lastNameController;
   late TextEditingController emailController;
   late TextEditingController otpController;
   late TextEditingController passwordController;
@@ -31,7 +32,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController();
+    firstNameController = TextEditingController();
+    lastNameController = TextEditingController();
     emailController = TextEditingController();
     otpController = TextEditingController();
     passwordController = TextEditingController();
@@ -41,7 +43,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   @override
   void dispose() {
-    nameController.dispose();
+    firstNameController.dispose();
+    lastNameController.dispose();
     emailController.dispose();
     otpController.dispose();
     passwordController.dispose();
@@ -55,34 +58,35 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void handleOnRegister() {
     if (_formKey.currentState!.validate()) {
-      String name = nameController.text;
+      String firstName = firstNameController.text;
+      String lastName = lastNameController.text;
       String email = emailController.text;
       String password = passwordController.text;
       String confirmPassword = confirmPasswordController.text;
 
       if (password == confirmPassword) {
-        User user = User(name: name, email: email, password: password);
-        Future<User?> authUser = authService.register(user);
+        User user = User(firstName: firstName, lastName: lastName,
+            email: email, password: password, confirmPassword: confirmPassword);
+        Future<bool?> userRegistration = authService.register(user);
 
-        authUser.then(
-          (user) => {
-            if (user != null)
+        userRegistration.then(
+          (registered) => {
+            if (registered == true)
               {
-                popSnack(
-                  title: "Welcome ${user.name}",
-                ),
-                Get.offNamed('/'),
+                Get.offNamed('/login'),
+
               }
             else
               {
                 popSnack(
-                  title: "Error Logging In",
+                  title: "Error registering the user",
                   message: "Something went wrong...",
                   isError: true,
                 ),
                 setState(() {
                   _isloading = false;
                 }),
+
               },
           },
         );
@@ -126,9 +130,17 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       children: [
                         SingleTextField(
                           keyboardType: TextInputType.text,
-                          editingController: nameController,
+                          editingController: firstNameController,
                           maxLength: 128,
-                          hintText: "Name",
+                          hintText: "First Name",
+                          textInputAction: TextInputAction.next,
+                          onEditingComplete: handleEditingConplete,
+                        ),
+                        SingleTextField(
+                          keyboardType: TextInputType.text,
+                          editingController: lastNameController,
+                          maxLength: 128,
+                          hintText: "Last Name",
                           textInputAction: TextInputAction.next,
                           onEditingComplete: handleEditingConplete,
                         ),

@@ -20,9 +20,11 @@ class ErrorMessageConstants {
 }
 
 class UrlConstants {
-  static const String backendBaseUrl = "https://jsonplaceholder.typicode.com";
-  static const String register = "/posts";
-  static const String login = "/posts";
+  static const String backendBaseUrl = "http://10.0.2.2:8000";
+  static const String register = "/identity/api/register/";
+  static const String login = "/identity/api/login/";
+  static const String logout = "/identity/api/logout/";
+  static const String logoutAll = "/identity/api/logout/all/";
 }
 
 class SizeConstants {

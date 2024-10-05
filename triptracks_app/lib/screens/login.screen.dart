@@ -55,7 +55,7 @@ class _LoginScreenState extends State<LoginScreen> {
           if (user != null)
             {
               popSnack(
-                title: "Welcome ${user.name}",
+                title: "Welcome ${user.firstName}",
               ),
               Get.offNamed('/'),
             }
