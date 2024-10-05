@@ -3,6 +3,7 @@ import 'package:triptracks_app/screens/feed.screen.dart';
 import 'package:triptracks_app/screens/messages.screen.dart';
 import 'package:triptracks_app/screens/profile.screen.dart';
 import 'package:triptracks_app/screens/search.screen.dart';
+import 'package:triptracks_app/widgets/popups/pop_snack.widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -66,6 +67,14 @@ class _HomeScreenState extends State<HomeScreen> {
           }),
         },
       ),
+      floatingActionButton: FloatingActionButton(onPressed: () => {
+        popSnack(
+          title: "Plan a trip",
+          message: "This button is form starting a trip plan",
+          isError: true,
+        )
+
+      }),
     );
   }
 }

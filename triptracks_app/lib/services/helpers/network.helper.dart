@@ -2,7 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:get/get.dart' as get_router;
 import 'package:triptracks_app/common/enums.common.dart';
+import 'package:triptracks_app/services/secure_storage.service.dart';
 
 class NetworkHelper {
   final String baseUrl;
@@ -48,8 +50,8 @@ class NetworkHelper {
         // TODO: Add handling of 400
         return response.data;
       } else if (response.statusCode == 401) {
-        // TODO: Add handling of 401
-        return response.data;
+        await SecureStorageService.instance.deleteKey('token');
+        get_router.Get.offAllNamed("/login");
       } else {
         throw Exception(
             'Failed to make ${method.toString()} request: ${response.statusCode}');

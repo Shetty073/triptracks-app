@@ -4,6 +4,7 @@ import 'package:triptracks_app/common/constants.common.dart';
 import 'package:triptracks_app/common/utils.common.dart';
 import 'package:triptracks_app/models/user.model.dart';
 import 'package:triptracks_app/services/auth.service.dart';
+import 'package:triptracks_app/services/secure_storage.service.dart';
 import 'package:triptracks_app/widgets/inputs/primary_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/primary_text_button.widget.dart';
 import 'package:triptracks_app/widgets/inputs/single_text_field.widget.dart';
@@ -22,7 +23,7 @@ class _LoginScreenState extends State<LoginScreen> {
   late TextEditingController passwordController;
   late AuthService authService;
   bool _loginButtonEnabled = false;
-  bool _isloading = false;
+  bool _isLoading = true;
   final _formKey = GlobalKey<FormState>();
 
   @override
@@ -31,6 +32,7 @@ class _LoginScreenState extends State<LoginScreen> {
     emailController = TextEditingController();
     passwordController = TextEditingController();
     authService = AuthService();
+    _checkLoginStatus();
   }
 
   @override
@@ -40,13 +42,29 @@ class _LoginScreenState extends State<LoginScreen> {
     passwordController.dispose();
   }
 
+  void _checkLoginStatus() async {
+    String? token = await SecureStorageService.instance.getKey('token');
+
+    if (token != null && token != "") {
+      Get.offNamed("/");
+
+    } else {
+      setState(() {
+        _isLoading = false;
+
+      });
+
+    }
+
+  }
+
   void handleOnLogin() {
     if (_formKey.currentState!.validate()) {
       String email = emailController.text;
       String password = passwordController.text;
 
       setState(() {
-        _isloading = true;
+        _isLoading = true;
       });
       
       Future<User?> authUser = authService.login(email, password);
@@ -67,7 +85,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 isError: true,
               ),
               setState(() {
-                _isloading = false;
+                _isLoading = false;
               }),
             },
         },
@@ -100,7 +118,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             child: Form(
               key: _formKey,
-              child: _isloading
+              child: _isLoading
                   ? const Spinner()
                   : Column(
                       mainAxisAlignment: MainAxisAlignment.center,
