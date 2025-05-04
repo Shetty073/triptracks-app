@@ -5,7 +5,7 @@ import { BACKEND_BASE_URI } from '../constants/urls';
 // Create an Axios instance
 const axiosClient = axios.create({
   baseURL: BACKEND_BASE_URI,
-  timeout: 10000, // 10 seconds timeout
+  timeout: 30000, // 30 seconds timeout
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
@@ -54,7 +54,12 @@ axiosClient.interceptors.response.use(
         case 401:
           console.warn('Unauthorized. Logging out...');
           sessionStorage.removeItem('authToken');
-          // Optionally redirect to login
+
+          const { logout } = useAuth();
+          logout();
+
+          const navigate = useNavigate();
+          navigate('/auth');
           break;
         case 403:
           console.warn('Forbidden');

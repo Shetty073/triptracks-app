@@ -4,6 +4,7 @@ import useThemeSwitcher from "../hooks/useThemeSwitcher";
 import NavItem from "./navItem.component";
 import DropdownNavItem from "./dropdownNavItem.component";
 import axiosClient from "../utils/axiosClient";
+import { useAuth } from "../contexts/authContext";
 
 export default function SideNav() {
   const sidebarRef = useRef(null);
@@ -12,6 +13,8 @@ export default function SideNav() {
   const themeBtnTextRef = useRef(null);
 
   const navigate = useNavigate();
+
+  const { logout } = useAuth();
 
   // custom hook for theme switching
   const { toggleTheme } = useThemeSwitcher(themeBtnIconRef, themeBtnTextRef);
@@ -55,6 +58,7 @@ export default function SideNav() {
       const response = await axiosClient.post('/identity/api/logout/');
 
       sessionStorage.removeItem('authToken');
+      logout();
       navigate('/auth');
     } catch (err) {
       // Error already handled by interceptor

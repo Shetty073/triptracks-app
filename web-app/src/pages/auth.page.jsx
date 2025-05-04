@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import axiosClient from '../utils/axiosClient';
 import Alert from '../components/alert.component';
 import '../styles/auth.css';
+import { useAuth } from '../contexts/authContext';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,8 @@ export default function AuthPage() {
   const [alert, setAlert] = useState({ message: '', type: '' });
 
   const navigate = useNavigate();
+
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -21,10 +24,11 @@ export default function AuthPage() {
       });
 
       sessionStorage.setItem('authToken', response.data.data.token);
+      login(response.data.data.user);
       navigate('/dashboard/trips');
     } catch (err) {
       let msg = 'Something went wrong.';
-      
+
       if (err.response.status === 403) {
         msg = 'Invalid email or password.';
       }
