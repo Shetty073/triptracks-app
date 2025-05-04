@@ -4,7 +4,7 @@ export default function Footer() {
       <div className="container-fluid">
         <div className="row text-body-secondary">
           <div className="col-6 text-start">
-            <a href="#" className="text-body-secondary">
+            <a href="https://github.com/Shetty073" className="text-body-secondary">
               <strong>Ashish Shetty</strong>
             </a>
           </div>

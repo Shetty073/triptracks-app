@@ -1,3 +1,4 @@
+import { Link } from "react-router";
 import Footer from "../components/footer.component";
 
 export default function HomePage() {
@@ -48,7 +49,7 @@ export default function HomePage() {
               <hr className="featurette-divider" />
 
               <div className="text-end">
-                <button type="button" className="btn btn-outline-light me-2">Login</button>
+                <Link to="/auth" className="btn btn-outline-light me-2">Login</Link>
                 <button type="button" className="btn btn-warning">Sign-up</button>
               </div>
 

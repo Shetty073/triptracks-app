@@ -4,6 +4,7 @@ import '../styles/auth.css'
 export default function AuthPage() {
   return (
     <>
+    <header className="p-3 text-bg-dark"></header>
       <main className="form-signin w-100 m-auto position-absolute top-50 start-50 translate-middle">
         <form>
           <img className="mb-4" src="/docs/5.3/assets/brand/bootstrap-logo.svg" alt="" width="72" height="57" />
@@ -29,7 +30,6 @@ export default function AuthPage() {
         </form>
       </main>
 
-      <Footer />
     </>
   );
 }
