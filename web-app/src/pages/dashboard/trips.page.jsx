@@ -1,7 +1,7 @@
 import DashboardCard from "../../components/dashboardCard.component";
 import DashboardTable from "../../components/dashboardTable.component";
 
-export default function CardsPage() {
+export default function TripsPage() {
   const cards = [
     {
       title: "Member Progress",

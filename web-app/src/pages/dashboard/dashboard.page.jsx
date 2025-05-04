@@ -3,7 +3,7 @@ import { Routes, Route } from "react-router";
 import SideNav from '../../components/sidenav.component';
 import TopNav from '../../components/topnav.component';
 import Footer from '../../components/footer.component';
-import CardsPage from './cards.page';
+import TripsPage from './trips.page';
 import FormsPage from './forms.page';
 
 export default function DashboardPage() {
@@ -33,7 +33,7 @@ export default function DashboardPage() {
         {/* Main dashboard contents */}
         <main className="content px-3 py-4">
           <Routes>
-            <Route path="/cards" element={<CardsPage />} />
+            <Route path="/trips" element={<TripsPage />} />
             <Route path="/forms" element={<FormsPage />} />
           </Routes>
         </main>

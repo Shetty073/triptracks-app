@@ -67,23 +67,15 @@ export default function SideNav() {
       </div>
 
       <ul className="sidebar-nav">
-        <NavItem icon="bx bxs-user-account" text="Profile" routeTo="/dashboard/cards" />
-        <NavItem icon="bx bxs-layer" text="Tasks" routeTo="/dashboard/forms" />
-
-        <DropdownNavItem icon="bx bxs-bug-alt" title="Auth" targetId="auth">
-          <NavItem text="Login" />
-          <NavItem text="Register" />
+        <NavItem icon="bx bx-trip" text="Trips" routeTo="/dashboard/trips" />
+        <NavItem icon="bx bxs-car" text="Vehicles" routeTo="/dashboard/forms" />
+        <NavItem icon="bx bxs-group" text="Crew" routeTo="/dashboard/forms" />
+        <NavItem icon="bx bxs-conversation" text="Messages" routeTo="/dashboard/forms" />
+        <DropdownNavItem icon="bx bxs-cog" title="Settings" targetId="auth">
+          <NavItem text="My Profile" routeTo="/dashboard/forms" />
+          <NavItem text="Analytics" routeTo="/dashboard/forms" />
+          <NavItem text="Help Center" routeTo="/dashboard/forms" />
         </DropdownNavItem>
-
-        <DropdownNavItem icon="bx bxs-bar-chart-alt-2" title="Multi-Level" targetId="multi">
-          <DropdownNavItem title="Two Links" targetId="multi-inner-1">
-            <NavItem text="Link 1" />
-            <NavItem text="Link 2" />
-          </DropdownNavItem>
-        </DropdownNavItem>
-
-        <NavItem icon="bx bxs-bell-ring" text="Notification" />
-        <NavItem icon="bx bxs-cog" text="Setting" />
       </ul>
 
       <div className="sidebar-footer">

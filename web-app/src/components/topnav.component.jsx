@@ -1,3 +1,5 @@
+import { Link } from "react-router";
+
 export default function TopNav() {
   const handleSearch = () => {
     console.debug("Search button was clicked! 🔍")
@@ -22,22 +24,22 @@ export default function TopNav() {
               <img src="https://i.pravatar.cc/200" className="avatar img-fluid" alt="" />
             </a>
             <div className="dropdown-menu dropdown-menu-end rounded-0 border-0 shadow mt-3">
-              <a href="#" className="dropdown-item">
+              <Link to="/dashboard/forms" className="dropdown-item">
                 <i className='bx bx-data'></i>
                 <span>Analytics</span>
-              </a>
+              </Link>
 
-              <a href="#" className="dropdown-item">
+              <Link to="/dashboard/forms" className="dropdown-item">
                 <i className='bx bx-cog'></i>
                 <span>Setting</span>
-              </a>
+              </Link>
 
               <div className="dropdown-divider"></div>
 
-              <a href="#" className="dropdown-item">
+              <Link to="/dashboard/forms" className="dropdown-item">
                 <i className='bx bx-help-circle'></i>
                 <span>Help Center</span>
-              </a>
+              </Link>
             </div>
           </li>
         </ul>
