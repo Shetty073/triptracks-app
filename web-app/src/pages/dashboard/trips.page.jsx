@@ -42,8 +42,8 @@ export default function TripsPage() {
     <div className="container-fluid">
       <div className="mb-3">
         <div className="row justify-content-between">
-          <h3 className="fw-bold fs-4 mb-3 text-capitalize col-4">Trips Dashboard</h3>
-          <Link to="/dashboard/trips/plan" className="btn btn-primary col-2 mb-3">Plan a new trip</Link>
+          <h3 className="fw-bold fs-4 mb-3 text-capitalize col-6 col-md-4">Trips Dashboard</h3>
+          <Link to="/dashboard/trips/plan" className="btn btn-primary col-6 col-lg-2 mb-3">Plan a new trip</Link>
         </div>
 
         {/* Cards */}
