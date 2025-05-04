@@ -135,3 +135,6 @@ dist
 .yarn/install-state.gz
 .pnp.*
 .DS_Store
+web-app/src/.env.development
+web-app/src/.env.production
+web-app/src/.env.uat
