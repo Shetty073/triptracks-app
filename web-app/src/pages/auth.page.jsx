@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router';
 import axiosClient from '../utils/axiosClient';
+import Alert from '../components/alert.component';
 import '../styles/auth.css';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [alert, setAlert] = useState({ message: '', type: '' });
 
   const navigate = useNavigate();
 
@@ -21,8 +23,13 @@ export default function AuthPage() {
       sessionStorage.setItem('authToken', response.data.data.token);
       navigate('/dashboard/trips');
     } catch (err) {
-      // Error already handled by interceptor
-      console.error(`Something went wrong ${err}`);
+      let msg = 'Something went wrong.';
+      
+      if (err.response.status === 403) {
+        msg = 'Invalid email or password.';
+      }
+
+      setAlert({ message: msg, type: 'danger' });
     }
 
   };
@@ -65,6 +72,13 @@ export default function AuthPage() {
             </label>
           </div>
           <button className="btn btn-primary w-100 py-2" type="submit">Sign in</button>
+          {alert.message && (
+            <Alert
+              message={alert.message}
+              type={alert.type}
+              onClose={() => setAlert({ message: '', type: '' })}
+            />
+          )}
           <p className="mt-5 mb-3 text-body-secondary">&copy; 2025</p>
         </form>
       </main>
