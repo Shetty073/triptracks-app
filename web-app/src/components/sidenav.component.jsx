@@ -1,13 +1,17 @@
 import { useEffect, useRef } from "react";
+import { useNavigate } from 'react-router';
 import useThemeSwitcher from "../hooks/useThemeSwitcher";
 import NavItem from "./navItem.component";
 import DropdownNavItem from "./dropdownNavItem.component";
+import axiosClient from "../utils/axiosClient";
 
 export default function SideNav() {
   const sidebarRef = useRef(null);
   const iconRef = useRef(null);
   const themeBtnIconRef = useRef(null);
   const themeBtnTextRef = useRef(null);
+
+  const navigate = useNavigate();
 
   // custom hook for theme switching
   const { toggleTheme } = useThemeSwitcher(themeBtnIconRef, themeBtnTextRef);
@@ -46,8 +50,16 @@ export default function SideNav() {
     }
   };
 
-  const handleLogout = () => {
-    console.debug("Logout button was clicked! 😲🔲")
+  const handleLogout = async () => {
+    try {
+      const response = await axiosClient.post('/identity/api/logout/');
+
+      sessionStorage.removeItem('authToken');
+      navigate('/auth');
+    } catch (err) {
+      // Error already handled by interceptor
+      console.error(`Something went wrong ${err}`);
+    }
   };
   
   useEffect(() => {
