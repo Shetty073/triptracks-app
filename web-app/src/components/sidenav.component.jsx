@@ -84,8 +84,8 @@ export default function SideNav() {
 
       <ul className="sidebar-nav">
         <NavItem icon="bx bx-trip" text="Trips" routeTo="/dashboard/trips" />
-        <NavItem icon="bx bxs-car" text="Vehicles" routeTo="/dashboard/forms" />
-        <NavItem icon="bx bxs-group" text="Crew" routeTo="/dashboard/forms" />
+        <NavItem icon="bx bxs-car" text="Vehicles" routeTo="/dashboard/vehicles" />
+        <NavItem icon="bx bxs-group" text="Crew" routeTo="/dashboard/crew" />
         <NavItem icon="bx bxs-conversation" text="Messages" routeTo="/dashboard/forms" />
         <DropdownNavItem icon="bx bxs-cog" title="Settings" targetId="auth">
           <NavItem text="My Profile" routeTo="/dashboard/forms" />
