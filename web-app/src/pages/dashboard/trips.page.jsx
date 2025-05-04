@@ -1,25 +1,26 @@
+import { Link } from "react-router";
 import DashboardCard from "../../components/dashboardCard.component";
 import DashboardTable from "../../components/dashboardTable.component";
 
 export default function TripsPage() {
   const cards = [
     {
-      title: "Member Progress",
-      value: "$75,648",
+      title: "Distance Travelled",
+      value: "7,648 KM",
       badgeText: "+9.0%",
-      description: "Since Last Month",
+      description: "Since Last Year",
     },
     {
-      title: "Revenue",
-      value: "$120,300",
-      badgeText: "+12.4%",
-      description: "Growth in Q1",
+      title: "Fuel Consumed",
+      value: "1121 Litres",
+      badgeText: "+0.8%",
+      description: "Since Last Year",
     },
     {
-      title: "New Users",
-      value: "1,250",
+      title: "Locations Visited",
+      value: "18",
       badgeText: "+5.1%",
-      description: "From Last Week",
+      description: "Since Last Year",
     },
   ];
 
@@ -40,7 +41,10 @@ export default function TripsPage() {
   return (
     <div className="container-fluid">
       <div className="mb-3">
-        <h3 className="fw-bold fs-4 mb-3 text-capitalize">Admin Dashboard</h3>
+        <div class="row justify-content-between">
+          <h3 className="fw-bold fs-4 mb-3 text-capitalize col-4">Trips Dashboard</h3>
+          <Link to="/dashboard/trips/plan" className="btn btn-primary col-2 mb-3">Plan a new trip</Link>
+        </div>
 
         {/* Cards */}
         <div className="row">
@@ -54,10 +58,10 @@ export default function TripsPage() {
         {/* Table & Chart */}
         <div className="row">
           <div className="col-12 col-md-6">
-            <DashboardTable title="Users" columns={userColumns} data={userData} />
+            <DashboardTable title="Upcoming Trips" columns={userColumns} data={userData} />
           </div>
           <div className="col-12 col-md-6">
-            <DashboardTable title="Orders" columns={orderColumns} data={orderData} />
+            <DashboardTable title="Past Trips" columns={orderColumns} data={orderData} />
           </div>
         </div>
       </div>

@@ -5,6 +5,7 @@ import TopNav from '../../components/topnav.component';
 import Footer from '../../components/footer.component';
 import TripsPage from './trips.page';
 import FormsPage from './forms.page';
+import PlanTripPage from './plan_trips.page';
 
 export default function DashboardPage() {
   useEffect(() => {
@@ -34,6 +35,7 @@ export default function DashboardPage() {
         <main className="content px-3 py-4">
           <Routes>
             <Route path="/trips" element={<TripsPage />} />
+            <Route path="/trips/plan" element={<PlanTripPage />} />
             <Route path="/forms" element={<FormsPage />} />
           </Routes>
         </main>
