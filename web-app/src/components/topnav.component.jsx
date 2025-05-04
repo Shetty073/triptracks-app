@@ -1,6 +1,10 @@
 import { Link } from "react-router";
+import { useAuth } from "../contexts/authContext";
+import { BACKEND_BASE_URI } from "../constants/urls";
 
 export default function TopNav() {
+  const { user } = useAuth();
+
   const handleSearch = () => {
     console.debug("Search button was clicked! 🔍")
   }
@@ -21,7 +25,7 @@ export default function TopNav() {
         <ul className="navbar-nav ms-auto">
           <li className="nav-item dropdown">
             <a href="#" data-bs-toggle="dropdown" className="nav-icon pe-md-0">
-              <img src="https://i.pravatar.cc/200" className="avatar img-fluid" alt="" />
+              <img src={`${BACKEND_BASE_URI}/${user?.profile_photo}`} className="avatar img-fluid" alt="" />
             </a>
             <div className="dropdown-menu dropdown-menu-end rounded-0 border-0 shadow mt-3">
               <Link to="/dashboard/forms" className="dropdown-item">
