@@ -28,7 +28,7 @@ export default function SideNav() {
   
     const isExpanded = sidebar.classList.contains("expand");
   
-    sessionStorage.setItem("navbarState", isExpanded ? "expand" : "collapsed");
+    localStorage.setItem("navbarState", isExpanded ? "expand" : "collapsed");
   
     icon.classList.toggle("bx-chevrons-right", !isExpanded);
     icon.classList.toggle("bx-chevrons-left", isExpanded);
@@ -39,7 +39,7 @@ export default function SideNav() {
     const sidebar = sidebarRef.current;
     const icon = iconRef.current;
   
-    const navbarState = sessionStorage.getItem("navbarState");
+    const navbarState = localStorage.getItem("navbarState");
     const isExpanded = navbarState === "expand";
   
     if (isExpanded) {

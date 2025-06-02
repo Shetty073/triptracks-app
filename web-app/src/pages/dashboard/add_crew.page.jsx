@@ -3,28 +3,25 @@ import { Link } from "react-router";
 import axiosClient from "../../utils/axiosClient";
 import { ENDPOINTS } from "../../constants/urls";
 
-export default function AddCrewPage(params) {
+export default function AddCrewPage() {
   const [searchInputValue, setSearchInputValue] = useState('');
   const [debouncedInput, setDebouncedInput] = useState('');
   const [users, setUsers] = useState([]);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
   const [loading, setLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [buttonLoading, setButtonLoading] = useState(false);
 
-  // Debounce logic: waits 1s after user stops typing
+  // Debounce input by 1 second
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setDebouncedInput(searchInputValue);
-    }, 1000);
-
-    return () => clearTimeout(timer); // cleanup previous timer
+    const timer = setTimeout(() => setDebouncedInput(searchInputValue), 1000);
+    return () => clearTimeout(timer);
   }, [searchInputValue]);
 
-  // Trigger actual search logic here
+  // Perform search when debouncedInput changes
   useEffect(() => {
     if (debouncedInput.trim()) {
-      searchUserByUsernameOrEmail(debouncedInput);
+      searchUser(debouncedInput);
     } else {
       setUsers([]);
       setLoading(false);
@@ -32,121 +29,116 @@ export default function AddCrewPage(params) {
   }, [debouncedInput]);
 
   const handleInputChange = (e) => {
+    setSearchInputValue(e.target.value);
     setLoading(true);
     setButtonLoading(false);
     setUsers([]);
-    setErrorMessage("");
-
-    setSearchInputValue(e.target.value);
+    setErrorMessage('');
+    setSuccessMessage('');
   };
 
-  const searchUserByUsernameOrEmail = async (userEmailOrUsername) => {
-    const response = await axiosClient.get(`${ENDPOINTS.SEARCH_USER_BY_USERNAME_OR_EMAIL}${userEmailOrUsername}`);
-    let message = undefined;
+  const searchUser = async (query) => {
+    try {
+      const response = await axiosClient.get(`${ENDPOINTS.SEARCH_USER_BY_USERNAME_OR_EMAIL}${query}`);
+      const results = response.data?.results;
 
-    if (response.status === 200) {
-      let results = response.data.results;
-      if (results !== undefined) {
-        setUsers(response.data.results);
+      if (response.status === 200 && Array.isArray(results)) {
+        setUsers(results);
       } else {
-        message = response.data.message;
+        setErrorMessage(response.data?.message || 'No results found.');
       }
-
-    } else {
-      message = response.data.message;
-      if (message === undefined || message === "") {
-        message = "Unable to fetch user details";
-      }
+    } catch (error) {
+      setErrorMessage('Unable to fetch user details');
+    } finally {
+      setLoading(false);
     }
-
-    if (message !== null && message !== undefined && message !== "") {
-      setErrorMessage(message);
-    }
-
-    setLoading(false);
   };
 
-  const handleAddToCrew = async (to_user) => {
+  const handleAddToCrew = async (userId) => {
     setButtonLoading(true);
-    const response = await axiosClient.post(ENDPOINTS.SEND_CREW_REQUEST, {
-      "to_user": to_user
-    });
+    try {
+      const response = await axiosClient.post(ENDPOINTS.SEND_CREW_REQUEST, { to_user: userId });
 
-    if (response.status === 201) {
-      setSuccessMessage(response.data.message)
-    } else {
-      setErrorMessage(response.data.message)
+      if (response.status === 201) {
+        setSuccessMessage(response.data?.message || "Crew request sent successfully");
+        setUsers([]);
+      } else {
+        setErrorMessage(response.data?.message || "Unable to send crew request");
+      }
+    } catch (error) {
+      setErrorMessage("Unable to send crew request");
+    } finally {
+      setButtonLoading(false);
     }
-    setButtonLoading(false);
   };
 
   return (
     <div className="container-fluid">
-      <div className="mb-3">
-        <div className="row justify-content-between">
-          <h3 className="fw-bold fs-4 mb-3 text-capitalize col-6 col-md-4">Add a new crew</h3>
-          <Link to="/dashboard/crew" className="btn btn-danger col-6 col-lg-2 mb-3">Cancel</Link>
-        </div>
+      {/* Header and cancel button */}
+      <div className="row justify-content-between mb-3">
+        <h3 className="fw-bold fs-4 col-6 col-md-4">Add a new crew</h3>
+        <Link to="/dashboard/crew" className="btn btn-danger col-6 col-lg-2">Cancel</Link>
+      </div>
 
-        <div className="row">
-          <div className="input-group mb-3">
-            <span className="input-group-text" id="basic-addon1">@</span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search users by username, email or phone number"
-              aria-label="User search bar"
-              aria-describedby="basic-addon1"
-              value={searchInputValue}
-              onChange={handleInputChange}
-            />
+      {/* Search bar */}
+      <div className="row mb-3">
+        <div className="input-group">
+          <span className="input-group-text">@</span>
+          <input
+            type="text"
+            className="form-control"
+            placeholder="Search users by username, email or phone number"
+            value={searchInputValue}
+            onChange={handleInputChange}
+            aria-label="User search bar"
+          />
+        </div>
+      </div>
+
+      {/* Results / Messages */}
+      <div className="mb-5">
+        {loading && (
+          <div className="d-flex justify-content-center mb-3">
+            <div className="spinner-grow text-secondary" role="status" />
           </div>
-        </div>
+        )}
 
-        <div className="row">
-          <div className="mb-5">
-            {loading && 
-            <div className="d-flex justify-content-center">
-              <div className="spinner-grow text-secondary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-            </div>}
-
-            {users.map((user) => {
-              return (
-                <div id={user.id} className="card d-flex flex-row">
-                  <h5 className="card-header">
-                    <img src={user.profile_photo} alt="Profile photo" height={100} />
-                  </h5>
-                  <div className="card-body d-flex flex-row justify-content-between align-items-center">
-                    <div>
-                      <h5 className="card-title">{user.first_name} {user.last_name}</h5>
-                      <div className="card-text">
-                        <div><strong>Username:</strong> {user.username}</div>
-                        <div><strong>Email:</strong> {user.email}</div>
-                      </div>
-                    </div>
-                    <div>
-                      <button type="button" className="btn btn-primary" onClick={() => {handleAddToCrew(user.id)}} disabled={buttonLoading}>Add to crew</button>
-                    </div>
-                  </div>
+        {users.map(user => (
+          <div key={user.id} className="card d-flex flex-row mb-3">
+            <div className="card-header">
+              <img src={user.profile_photo} alt="Profile" height={100} />
+            </div>
+            <div className="card-body d-flex flex-row justify-content-between align-items-center">
+              <div>
+                <h5 className="card-title">{user.first_name} {user.last_name}</h5>
+                <div className="card-text">
+                  <div><strong>Username:</strong> {user.username}</div>
+                  <div><strong>Email:</strong> {user.email}</div>
                 </div>
-              );
-            })}
-
-            {(successMessage && !loading) && 
-            <div className="alert alert-success" role="alert">
-              {successMessage}
-            </div>}
-
-            {(errorMessage && !loading) && 
-            <div className="alert alert-danger" role="alert">
-              {errorMessage}
-            </div>}
-
+              </div>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => handleAddToCrew(user.id)}
+                disabled={buttonLoading}
+              >
+                Add to crew
+              </button>
+            </div>
           </div>
-        </div>
+        ))}
 
+        {!loading && successMessage && (
+          <div className="alert alert-success alert-dismissible fade show">
+            {successMessage}
+          </div>
+        )}
+
+        {!loading && errorMessage && (
+          <div className="alert alert-danger alert-dismissible fade show">
+            {errorMessage}
+          </div>
+        )}
       </div>
     </div>
   );

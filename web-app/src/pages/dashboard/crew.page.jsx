@@ -8,86 +8,102 @@ import { ENDPOINTS } from "../../constants/urls";
 export default function CrewPage() {
   const [crewLoading, setCrewLoading] = useState(false);
   const [crewRequestLoading, setCrewRequestLoading] = useState(false);
-
   const [crewData, setCrewData] = useState([]);
   const [crewRequestData, setCrewRequestData] = useState([]);
-
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
   const crewColumns = ["username", "name", "email", "reuqested_at"];
-
-  const crewRequestDataColumns = ["crew_request_id", "username", "name", "email", "reuqested_at", "status"];
+  const crewRequestDataColumns = ["username", "name", "email", "reuqested_at", "status"];
 
   const fetchCrewMembers = async () => {
     setCrewLoading(true);
-    const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_MEMBERS_FOR_CURRENT_USER);
-    if (response.status === 200) {
-      let results = response.data.data.results;
-      let crewData = [];
-      if (results) {
-        results.forEach(element => {
-          crewData.push([
-            element.requested_user.username, 
-            `${element.requested_user.first_name} ${element.requested_user.last_name}`, 
-            element.requested_user.email, 
-            formatDateToDDMMYYYY(element.created_at)
-          ]);
-        });
+    try {
+      const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_MEMBERS_FOR_CURRENT_USER);
+      if (response.status === 200) {
+        const results = response.data.data.results || [];
+        const transformedData = results.map(({ requested_user, created_at }) => ([
+          requested_user.username,
+          `${requested_user.first_name} ${requested_user.last_name}`,
+          requested_user.email,
+          formatDateToDDMMYYYY(created_at),
+          requested_user.id
+        ]));
+        setCrewData(transformedData);
+      } else {
+        setErrorMessage(response.data.message || "Unable to fetch crew data");
       }
-      
-      setCrewData(crewData);
-    } else {
-      let errorMessage = response.data.message | "Unable to fetch crew data";
-      setErrorMessage(errorMessage);
+    } catch (err) {
+      setErrorMessage("Error fetching crew data");
+    } finally {
+      setCrewLoading(false);
     }
-    setCrewLoading(false);
   };
 
   const fetchCrewRequests = async () => {
     setCrewRequestLoading(true);
-    const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_REQUESTS);
-    if (response.status === 200) {
-      let results = response.data.data.results;
-      let crewRequests = [];
-      if (results) {
-        results.forEach(element => {
-          crewRequests.push([
-            element.id, 
-            element.from_user.username, 
-            `${element.from_user.first_name} ${element.from_user.last_name}`, 
-            element.from_user.email, 
-            formatDateToDDMMYYYY(element.created_at),
-            element.accepted ? "Accepted" : "Pending",
-          ]);
-        });
+    try {
+      const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_REQUESTS);
+      if (response.status === 200) {
+        const results = response.data.data.results || [];
+        const transformedData = results.map(({ from_user, created_at, accepted, id }) => ([
+          from_user.username,
+          `${from_user.first_name} ${from_user.last_name}`,
+          from_user.email,
+          formatDateToDDMMYYYY(created_at),
+          accepted ? "Accepted" : "Pending",
+          id
+        ]));
+        setCrewRequestData(transformedData);
+      } else {
+        setErrorMessage(response.data.message || "Unable to fetch crew requests");
       }
-      
-      setCrewRequestData(crewRequests);
-    } else {
-      let errorMessage = response.data.message | "Unable to fetch crew requests";
-      setErrorMessage(errorMessage);
+    } catch (err) {
+      setErrorMessage("Error fetching crew requests");
+    } finally {
+      setCrewRequestLoading(false);
     }
-    setCrewRequestLoading(false);
   };
 
   const acceptRejectCrewRequest = async (id, accept) => {
-    const response = await axiosClient.patch(`${ENDPOINTS.ACCEPT_REJECT_CREW_REQUESTS}${id}/`, {
-      "accept": accept
-    });
-    if (response.status === 202) {
-      let errorMessage = response.data.message | "Crew request accepted successfully";
-      setSuccessMessage(errorMessage);
-      
-    } else {
-      let errorMessage = response.data.message | "Unable to process crew requests";
-      setErrorMessage(errorMessage);
+    try {
+      const response = await axiosClient.patch(`${ENDPOINTS.ACCEPT_REJECT_CREW_REQUESTS}${id}/`, { accept });
+      if (response.status === 202) {
+        setSuccessMessage(response.data.message || "Crew request processed");
+        fetchAllData();
+      } else {
+        setErrorMessage(response.data.message || "Unable to process crew request");
+      }
+    } catch {
+      setErrorMessage("Error processing crew request");
     }
   };
 
-  useEffect(() => {
+  const removeUserFromCrew = async (id) => {
+    try {
+      const response = await axiosClient.delete(`${ENDPOINTS.REMOVE_USER_FROM_CREW}${id}/`);
+      if (response.status === 202) {
+        setSuccessMessage(response.data.message || "User removed from crew");
+        fetchAllData();
+      } else {
+        setErrorMessage(response.data.message || "Unable to remove user");
+      }
+    } catch {
+      setErrorMessage("Error removing user");
+    }
+  };
+
+  const fetchAllData = () => {
+    setCrewData([]);
+    setCrewRequestData([]);
+    setSuccessMessage("");
+    setErrorMessage("");
     fetchCrewMembers();
     fetchCrewRequests();
+  };
+
+  useEffect(() => {
+    fetchAllData();
   }, []);
 
   return (
@@ -98,71 +114,80 @@ export default function CrewPage() {
           <Link to="/dashboard/crew/add" className="btn btn-primary col-6 col-lg-2 mb-3">Add a new crew</Link>
         </div>
 
-        <div className="row">
-          {(successMessage && !crewRequestLoading && !crewLoading) && 
-          <div className="alert alert-success" role="alert">
-            {successMessage}
-          </div>}
+        {(successMessage || errorMessage) && (
+          <div className="row">
+            {successMessage && (
+              <div className="alert alert-success alert-dismissible fade show" role="alert">
+                {successMessage}
+              </div>
+            )}
+            {errorMessage && (
+              <div className="alert alert-danger alert-dismissible fade show" role="alert">
+                {errorMessage}
+              </div>
+            )}
+          </div>
+        )}
 
-          {(errorMessage && !crewRequestLoading && !crewLoading) && 
-          <div className="alert alert-danger" role="alert">
-            {errorMessage}
-          </div>}
-        </div>
-
-        {/* Table & Chart */}
+        {/* My Crew Table */}
         <div className="row">
           <div className="col-12">
-            {crewLoading ?
-            <div className="d-flex justify-content-center">
-              <div className="spinner-grow text-secondary" role="status">
-                <span className="visually-hidden">Loading...</span>
+            {crewLoading ? (
+              <div className="d-flex justify-content-center">
+                <div className="spinner-grow text-secondary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
               </div>
-            </div>:
-            <DashboardTable
-              title="My Crew"
-              columns={crewColumns}
-              data={crewData}
-            />}
-
+            ) : (
+              <DashboardTable
+                title="My Crew"
+                columns={crewColumns}
+                data={crewData}
+                actions={[
+                  {
+                    label: "Remove",
+                    style: "danger",
+                    icon: "bx bx-list-minus",
+                    onClick: (row) => removeUserFromCrew(row[row.length - 1])
+                  }
+                ]}
+                eachRowHasLastItemAsId={true}
+              />
+            )}
           </div>
         </div>
 
-        {/* Table & Chart */}
+        {/* Crew Requests Table */}
         <div className="row">
           <div className="col-12">
-            {crewRequestLoading ?
-            <div className="d-flex justify-content-center">
-              <div className="spinner-grow text-secondary" role="status">
-                <span className="visually-hidden">Loading...</span>
+            {crewRequestLoading ? (
+              <div className="d-flex justify-content-center">
+                <div className="spinner-grow text-secondary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
               </div>
-            </div>:
-            <DashboardTable
-              title="New Crew Requests"
-              columns={crewRequestDataColumns}
-              data={crewRequestData}
-              actions={[
-                {
-                  label: "Accept",
-                  style: "success",
-                  icon: "bx bx-check",
-                  onClick: (row) => {
-                    const id = row[0];
-                    acceptRejectCrewRequest(id, true);
+            ) : (
+              <DashboardTable
+                title="New Crew Requests"
+                columns={crewRequestDataColumns}
+                data={crewRequestData}
+                actions={[
+                  {
+                    label: "Accept",
+                    style: "success",
+                    icon: "bx bx-check",
+                    onClick: (row) => acceptRejectCrewRequest(row[row.length - 1], true)
+                  },
+                  {
+                    label: "Reject",
+                    style: "danger",
+                    icon: "bx bx-x",
+                    onClick: (row) => acceptRejectCrewRequest(row[row.length - 1], false)
                   }
-                },
-                {
-                  label: "Reject",
-                  style: "danger",
-                  icon: "bx bx-x",
-                  onClick: (row) => {
-                    const id = row[0];
-                    acceptRejectCrewRequest(id, false);
-                  }
-                }
-              ]}
-            />}
-
+                ]}
+                eachRowHasLastItemAsId={true}
+              />
+            )}
           </div>
         </div>
       </div>

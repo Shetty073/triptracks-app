@@ -5,7 +5,7 @@ export default function useThemeSwitcher(iconRef, textRef) {
     const tables = document.querySelectorAll(".table");
 
     document.documentElement.setAttribute("data-theme", theme);
-    sessionStorage.setItem("theme", theme);
+    localStorage.setItem("theme", theme);
 
     if (theme === "dark") {
       iconRef.current?.classList.replace("bx-moon", "bx-sun");
@@ -26,7 +26,7 @@ export default function useThemeSwitcher(iconRef, textRef) {
   };
 
   useEffect(() => {
-    const saved = sessionStorage.getItem("theme") || "light";
+    const saved = localStorage.getItem("theme") || "light";
     applyTheme(saved);
   }, []);
 
