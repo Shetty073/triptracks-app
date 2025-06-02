@@ -23,7 +23,6 @@ export default function AuthPage() {
         email,
         password,
       });
-      console.log({response});
       
       login(response.data.data.user, response.data.data.token);
       navigate('/dashboard/trips');

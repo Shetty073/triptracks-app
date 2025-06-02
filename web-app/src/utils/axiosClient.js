@@ -50,7 +50,7 @@ axiosClient.interceptors.response.use(
       switch (response.status) {
         case 400:
           console.warn('Bad Request:', response.data);
-          break;
+          return response;
         case 401:
           console.warn('Unauthorized. Logging out...');
           sessionStorage.removeItem('authToken');
@@ -63,13 +63,13 @@ axiosClient.interceptors.response.use(
           break;
         case 403:
           console.warn('Forbidden');
-          break;
+          return response;
         case 404:
           console.warn('Not found');
-          break;
+          return response;
         case 500:
           console.error('Server error:', response.data);
-          break;
+          return response;
         default:
           console.error(`Error ${response.status}:`, response.data);
       }
