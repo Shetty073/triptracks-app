@@ -4,6 +4,7 @@ import axiosClient from '../utils/axiosClient';
 import Alert from '../components/alert.component';
 import '../styles/auth.css';
 import { useAuth } from '../contexts/authContext';
+import { ENDPOINTS } from '../constants/urls';
 
 export default function AuthPage() {
   const [email, setEmail] = useState('');
@@ -18,13 +19,12 @@ export default function AuthPage() {
     e.preventDefault();
 
     try {
-      const response = await axiosClient.post('/identity/api/login/', {
+      const response = await axiosClient.post(ENDPOINTS.LOGIN, {
         email,
         password,
       });
-
-      sessionStorage.setItem('authToken', response.data.data.token);
-      login(response.data.data.user);
+      
+      login(response.data.data.user, response.data.data.token);
       navigate('/dashboard/trips');
     } catch (err) {
       let msg = 'Something went wrong.';
