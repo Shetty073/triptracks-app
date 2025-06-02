@@ -1,10 +1,11 @@
 export default function DashboardTable({ title, columns, data, actions = [], eachRowHasLastItemAsId = false }) {
   const showActions = actions.length > 0;
+  const savedTheme = localStorage.getItem("theme");
 
   return (
     <div className="table-responsive">
       <h3 className="fw-bold fs-4 my-3 text-capitalize">{title}</h3>
-      <table className="table table-striped">
+      <table className={`${(savedTheme === "dark") ? "table table-striped table-dark": "table table-striped"}`}>
         <thead>
           <tr className="highlight">
             {columns.map((col, idx) => (
