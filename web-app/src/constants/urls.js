@@ -13,4 +13,7 @@ export const ENDPOINTS = {
     FETCH_CREW_REQUESTS: "/crew/api/crew/?open_requests=true'",
     ACCEPT_REJECT_CREW_REQUESTS: "/crew/api/crew/",
     REMOVE_USER_FROM_CREW: "/crew/api/crew/",
+
+    // Vehicle module
+    ADD_NEW_VEHICLE: '/vehicle/api/vehicle/',
 };
