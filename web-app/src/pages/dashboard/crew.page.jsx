@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router";
 import DashboardTable from "../../components/dashboardTable.component";
 import axiosClient from "../../utils/axiosClient";
-import { formatDateToDDMMYYYY } from "../../utils/dateUtils";
 import { ENDPOINTS } from "../../constants/urls";
 
 export default function CrewPage() {
@@ -13,22 +12,19 @@ export default function CrewPage() {
   const [errorMessage, setErrorMessage] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const crewColumns = ["username", "name", "email", "reuqested_at"];
-  const crewRequestDataColumns = ["username", "name", "email", "reuqested_at", "status"];
-
-  const fetchCrewMembers = async () => {
+  const fetchCrewMembers = async (page = 1) => {
     setCrewLoading(true);
     try {
-      const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_MEMBERS_FOR_CURRENT_USER);
+      const response = await axiosClient.get(`${ENDPOINTS.FETCH_CREW_MEMBERS_FOR_CURRENT_USER}?page=${page}`);
       if (response.status === 200) {
         const results = response.data.data.results || [];
-        const transformedData = results.map(({ requested_user, created_at }) => ([
-          requested_user.username,
-          `${requested_user.first_name} ${requested_user.last_name}`,
-          requested_user.email,
-          formatDateToDDMMYYYY(created_at),
-          requested_user.id
-        ]));
+        const transformedData = results.map(({ requested_user, created_at }) => ({
+          id: requested_user.id,
+          username: requested_user.username,
+          name: `${requested_user.first_name} ${requested_user.last_name}`,
+          email: requested_user.email,
+          requested_at: created_at,
+        }));
         setCrewData(transformedData);
       } else {
         setErrorMessage(response.data.message || "Unable to fetch crew data");
@@ -46,14 +42,14 @@ export default function CrewPage() {
       const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_REQUESTS);
       if (response.status === 200) {
         const results = response.data.data.results || [];
-        const transformedData = results.map(({ from_user, created_at, accepted, id }) => ([
-          from_user.username,
-          `${from_user.first_name} ${from_user.last_name}`,
-          from_user.email,
-          formatDateToDDMMYYYY(created_at),
-          accepted ? "Accepted" : "Pending",
-          id
-        ]));
+        const transformedData = results.map(({ from_user, created_at, accepted, id }) => ({
+          id,
+          username: from_user.username,
+          name: `${from_user.first_name} ${from_user.last_name}`,
+          email: from_user.email,
+          requested_on: created_at,
+          status: accepted ? "Accepted" : "Pending",
+        }));
         setCrewRequestData(transformedData);
       } else {
         setErrorMessage(response.data.message || "Unable to fetch crew requests");
@@ -138,22 +134,23 @@ export default function CrewPage() {
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-            ) : (
-              <DashboardTable
-                title="My Crew"
-                columns={crewColumns}
-                data={crewData}
-                actions={[
-                  {
-                    label: "Remove",
-                    style: "danger",
-                    icon: "bx bx-list-minus",
-                    onClick: (row) => removeUserFromCrew(row[row.length - 1])
-                  }
-                ]}
-                eachRowHasLastItemAsId={true}
-              />
-            )}
+            ) : (crewData.length > 0) &&
+            <DashboardTable
+              title="My Crew"
+              data={crewData}
+              renameColumns={{ 'requested_at': "Added On" }}
+              omitColumns={['id']}
+              dateColumns={["requested_at"]}
+              actions={[
+                {
+                  label: "Remove",
+                  style: "danger",
+                  icon: "bx bx-list-minus",
+                  onClick: (row) => removeUserFromCrew(row.id)
+                }
+              ]}
+            />
+            }
           </div>
         </div>
 
@@ -166,28 +163,30 @@ export default function CrewPage() {
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-            ) : (
-              <DashboardTable
-                title="New Crew Requests"
-                columns={crewRequestDataColumns}
-                data={crewRequestData}
-                actions={[
-                  {
-                    label: "Accept",
-                    style: "success",
-                    icon: "bx bx-check",
-                    onClick: (row) => acceptRejectCrewRequest(row[row.length - 1], true)
-                  },
-                  {
-                    label: "Reject",
-                    style: "danger",
-                    icon: "bx bx-x",
-                    onClick: (row) => acceptRejectCrewRequest(row[row.length - 1], false)
-                  }
-                ]}
-                eachRowHasLastItemAsId={true}
-              />
-            )}
+            ) : (crewRequestData.length > 0) && <DashboardTable
+              title="New Crew Requests"
+              data={crewRequestData}
+              dateColumns={["requested_on"]}
+              actions={[
+                {
+                  label: "Accept",
+                  style: "success",
+                  icon: "bx bx-check",
+                  onClick: (row) => acceptRejectCrewRequest(row.id, true),
+                  tooltip: "Accept the crew request",
+                  tooltipPosition: "bottom"
+                },
+                {
+                  label: "Reject",
+                  style: "danger",
+                  icon: "bx bx-x",
+                  onClick: (row) => acceptRejectCrewRequest(row.id, false),
+                  tooltip: "Reject the crew request",
+                  tooltipPosition: "bottom"
+                }
+              ]}
+            />
+            }
           </div>
         </div>
       </div>
