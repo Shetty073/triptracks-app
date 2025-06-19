@@ -138,7 +138,7 @@ export default function CrewPage() {
             <DashboardTable
               title="My Crew"
               data={crewData}
-              renameColumns={{'requested_at': "Added On"}}
+              renameColumns={{ 'requested_at': "Added On" }}
               omitColumns={['id']}
               dateColumns={["requested_at"]}
               actions={[
@@ -172,13 +172,17 @@ export default function CrewPage() {
                   label: "Accept",
                   style: "success",
                   icon: "bx bx-check",
-                  onClick: (row) => acceptRejectCrewRequest(row.id, true)
+                  onClick: (row) => acceptRejectCrewRequest(row.id, true),
+                  tooltip: "Accept the crew request",
+                  tooltipPosition: "bottom"
                 },
                 {
                   label: "Reject",
                   style: "danger",
                   icon: "bx bx-x",
-                  onClick: (row) => acceptRejectCrewRequest(row.id, false)
+                  onClick: (row) => acceptRejectCrewRequest(row.id, false),
+                  tooltip: "Reject the crew request",
+                  tooltipPosition: "bottom"
                 }
               ]}
             />

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useEffect } from "react";
 import { formatDateToDDMMYYYYWithTime12 } from "../utils/dateUtils";
 
 export default function DashboardTable({
@@ -8,21 +8,31 @@ export default function DashboardTable({
   actions = [],
   page = 1,
   totalPages = 1,
-  onPageChange = () => { },
+  onPageChange = () => {},
   dateColumns = ["created_at", "updated_at"],
   omitColumns = ["id"],
-  renameColumns = {}, // e.g. { created_at: "Requested On" }
+  renameColumns = {},
   actionsColumnWidth = "120px"
 }) {
   const showActions = actions.length > 0;
   const savedTheme = localStorage.getItem("theme");
 
+  useEffect(() => {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    tooltipTriggerList.forEach((el) => {
+      new window.bootstrap.Tooltip(el, {
+        delay: { show: 3000, hide: 100 }, // 👈 Show after 3s hover, hide quickly
+        trigger: "hover"
+      });
+    });
+  }, [data, actions]);
+
   const derivedColumns = useMemo(() => {
     if (columns?.length > 0) {
-      return columns.filter(col => !omitColumns.includes(col));
+      return columns.filter((col) => !omitColumns.includes(col));
     }
     if (data.length === 0) return [];
-    return Object.keys(data[0]).filter(col => !omitColumns.includes(col));
+    return Object.keys(data[0]).filter((col) => !omitColumns.includes(col));
   }, [data, columns, omitColumns]);
 
   const formatCell = (col, value) => {
@@ -46,7 +56,13 @@ export default function DashboardTable({
     <div className="table-responsive">
       <h3 className="fw-bold fs-4 my-3 text-capitalize">{title}</h3>
 
-      <table className={`${savedTheme === "dark" ? "table table-striped table-dark" : "table table-striped"}`}>
+      <table
+        className={`${
+          savedTheme === "dark"
+            ? "table table-striped table-dark"
+            : "table table-striped"
+        }`}
+      >
         <thead>
           <tr className="highlight">
             {derivedColumns.map((col, idx) => (
@@ -86,15 +102,26 @@ export default function DashboardTable({
                   }}
                 >
                   <div className="d-flex justify-content-center align-items-center flex-wrap gap-1">
-                    {actions.map((action, actionIdx) => (
-                      <button
-                        key={actionIdx}
-                        className={`btn btn-${action.style || "primary"} btn-sm`}
-                        onClick={() => action.onClick(row)}
-                      >
-                        {action.icon ? <i className={action.icon}></i> : <span>{action.label}</span>}
-                      </button>
-                    ))}
+                    {actions.map((action, actionIdx) => {
+                      const tooltip = action.tooltip;
+                      const tooltipPosition = action.tooltipPosition || "top";
+                      return (
+                        <button
+                          key={actionIdx}
+                          className={`btn btn-${action.style || "primary"} btn-sm`}
+                          onClick={() => action.onClick(row)}
+                          data-bs-toggle={tooltip ? "tooltip" : undefined}
+                          data-bs-placement={tooltip ? tooltipPosition : undefined}
+                          title={tooltip || undefined}
+                        >
+                          {action.icon ? (
+                            <i className={action.icon}></i>
+                          ) : (
+                            <span>{action.label}</span>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
                 </td>
               )}
@@ -111,7 +138,7 @@ export default function DashboardTable({
                 Previous
               </button>
             </li>
-            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map(pg => (
+            {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pg) => (
               <li className={`page-item ${pg === page ? "active" : ""}`} key={pg}>
                 <button className="page-link" onClick={() => handlePageChange(pg)}>
                   {pg}
