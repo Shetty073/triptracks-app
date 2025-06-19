@@ -36,8 +36,9 @@ export default function VehiclesPage() {
         setUserVehicles(resData.results);
         setUserVehicleCount(resData.count || 0);
         setUserPage(page);
+        console.log({userVehicles, vehiclesLoading});
       } else {
-        setErrorMessage(resData?.message || 'No results found.');
+        setErrorMessage(response.data?.message || 'Unable to fetch user vehicle details');
       }
     } catch {
       setErrorMessage('Unable to fetch user vehicle details');
@@ -55,7 +56,7 @@ export default function VehiclesPage() {
         setCrewVehicleCount(resData.count || 0);
         setCrewPage(page);
       } else {
-        setErrorMessage(resData?.message || 'No results found.');
+        setErrorMessage(response.data?.message || 'Unable to fetch crew vehicle details');
       }
     } catch {
       setErrorMessage('Unable to fetch crew vehicle details');
@@ -76,10 +77,10 @@ export default function VehiclesPage() {
 
         getUserVehicles(pageToLoad);
       } else {
-        setErrorMessage(resData?.message || 'No results found.');
+        setErrorMessage(response.data?.message || 'Unable to remove user vehicle');
       }
     } catch {
-      setErrorMessage('Unable to fetch user vehicle details');
+      setErrorMessage('Unable to remove user vehicle due to some error');
     }
     setVehiclesLoading(false);
   };
@@ -116,7 +117,7 @@ export default function VehiclesPage() {
                   <span className="visually-hidden">Loading...</span>
                 </div>
               </div>
-            ) : (crewVehicles.length > 0) &&
+            ) : (userVehicles.length > 0) &&
             <DashboardTable
               title="My Vehicles"
               data={userVehicles}
