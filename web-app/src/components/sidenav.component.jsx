@@ -75,7 +75,7 @@ export default function SideNav() {
     <aside id="sidebar" ref={sidebarRef}>
       <div className="d-flex justify-content-between p-4">
         <div className="sidebar-logo">
-          <a href="#">AdmiLite</a>
+          <a href="#">TripTracks</a>
         </div>
         <button className="toggle-btn border-0" type="button" onClick={handleNavToggle}>
           <i className='bx bx-chevrons-right' ref={iconRef}></i>
