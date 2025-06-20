@@ -278,7 +278,8 @@ tr.highlight th {
 }
 
 /* form elements */
-.form-control, .form-control:focus {
+.form-control,
+.form-control:focus {
   background-color: var(--form-bg);
   color: var(--text-main);
 }
@@ -288,6 +289,64 @@ footer {
   background-color: var(--footer-bg);
   padding: 1rem;
 }
+
+/* === Choices.js Custom Styling === */
+.choices__inner .choices__input {
+  width: 100% !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  color: var(--text-main) !important;
+}
+
+.choices__input {
+  background-color: var(--form-bg) !important;
+  border: none;
+}
+
+.choices {
+  width: 100% !important;
+}
+
+.choices__inner {
+  background-color: var(--form-bg) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--card-border) !important;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+}
+
+.choices__list--multiple .choices__item {
+  background-color: var(--highlight);
+  color: #fff;
+  border-radius: 0.375rem;
+  margin-right: 0.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.choices__list--dropdown,
+.choices__list[role="listbox"] {
+  background-color: var(--form-bg) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--card-border);
+}
+
+.choices__item--selectable.is-highlighted {
+  background-color: var(--text-main) !important;
+  color: var(--bg-main) !important;
+}
+
+.choices__button {
+  background-color: transparent;
+  border: none;
+  color: #fff;
+  opacity: 0.7;
+}
+
+.choices__button:hover {
+  opacity: 1;
+}
+
 
 /* Responsiveness */
 @media (min-width: 768px) {
