@@ -55,22 +55,34 @@ export default function PlanTripPage() {
   const [showOriginMap, setShowOriginMap] = useState(false);
   const [showDestinationMap, setShowDestinationMap] = useState(false);
 
-  // New state for API data
+  // New state for API data with pagination
   const [crewMembers, setCrewMembers] = useState([]);
   const [vehicleTypes, setVehicleTypes] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
+  // Pagination states
+  const [crewPage, setCrewPage] = useState(1);
+  const [crewHasMore, setCrewHasMore] = useState(true);
+  const [crewLoading, setCrewLoading] = useState(false);
+  const [vehiclePage, setVehiclePage] = useState(1);
+  const [vehicleHasMore, setVehicleHasMore] = useState(true);
+  const [vehicleLoading, setVehicleLoading] = useState(false);
+
   const { requestPermission, PromptComponent } = usePermissionPrompt();
   const crewSelectRef = useRef(null);
+  const crewChoicesRef = useRef(null);
 
   const myself = { id: 1, name: "Myself" };
 
-  // API call functions
-  const fetchCrewMembers = async () => {
+  // API call functions with pagination
+  const fetchCrewMembers = async (page = 1, append = false) => {
+    if (crewLoading) return;
+    setCrewLoading(true);
+    
     try {
-      const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_MEMBERS_FOR_CURRENT_USER);
+      const response = await axiosClient.get(`${ENDPOINTS.FETCH_CREW_MEMBERS_FOR_CURRENT_USER}?page=${page}`);
       if (response.status === 200 && response.data.success) {
         const crewData = response.data.data.results || [];
         const processedCrew = crewData.map(crew => ({
@@ -79,72 +91,122 @@ export default function PlanTripPage() {
           email: crew.requested_user.email,
           username: crew.requested_user.username
         }));
-        setCrewMembers(processedCrew);
+        
+        if (append) {
+          setCrewMembers(prev => [...prev, ...processedCrew]);
+        } else {
+          setCrewMembers(processedCrew);
+        }
+        
+        // Check if there are more pages
+        setCrewHasMore(!!response.data.data.next);
+        setCrewPage(page);
       } else {
         console.error('Failed to fetch crew members:', response.data.message);
-        setError(response.data.message || 'Failed to load crew members');
+        if (!append) {
+          setError(response.data.message || 'Failed to load crew members');
+        }
       }
     } catch (error) {
       console.error('Failed to fetch crew members:', error);
-      setError('Failed to load crew members');
+      if (!append) {
+        setError('Failed to load crew members');
+      }
+    } finally {
+      setCrewLoading(false);
     }
   };
 
-  const fetchUserVehicles = async () => {
+  const fetchUserVehicles = async (page = 1, append = false) => {
     try {
-      const response = await axiosClient.get(ENDPOINTS.GET_USER_VEHICLES);
+      const response = await axiosClient.get(`${ENDPOINTS.GET_USER_VEHICLES}?page=${page}`);
       if (response.status === 200 && response.data.success) {
         const vehicles = response.data.data.results || [];
-        return vehicles;
+        return {
+          vehicles,
+          hasMore: !!response.data.data.next
+        };
       } else {
         console.error('Failed to fetch user vehicles:', response.data.message);
-        return [];
+        return { vehicles: [], hasMore: false };
       }
     } catch (error) {
       console.error('Failed to fetch user vehicles:', error);
-      return [];
+      return { vehicles: [], hasMore: false };
     }
   };
 
-  const fetchCrewVehicles = async () => {
+  const fetchCrewVehicles = async (page = 1, append = false) => {
     try {
-      const response = await axiosClient.get(ENDPOINTS.GET_USER_CREW_VEHICLES);
+      const response = await axiosClient.get(`${ENDPOINTS.GET_USER_CREW_VEHICLES}?page=${page}`);
       if (response.status === 200 && response.data.success) {
         const vehicles = response.data.data.results || [];
-        return vehicles;
+        return {
+          vehicles,
+          hasMore: !!response.data.data.next
+        };
       } else {
         console.error('Failed to fetch crew vehicles:', response.data.message);
-        return [];
+        return { vehicles: [], hasMore: false };
       }
     } catch (error) {
       console.error('Failed to fetch crew vehicles:', error);
-      return [];
+      return { vehicles: [], hasMore: false };
     }
   };
 
-  const updateVehicleTypes = async () => {
-    setLoading(true);
+  const updateVehicleTypes = async (page = 1, append = false) => {
+    if (vehicleLoading) return;
+    setVehicleLoading(true);
+    
     try {
-      const [userVehicles, crewVehicles] = await Promise.all([
-        fetchUserVehicles(),
-        fetchCrewVehicles()
+      const [userResult, crewResult] = await Promise.all([
+        fetchUserVehicles(page),
+        fetchCrewVehicles(page)
       ]);
 
-      const userVehiclesArray = Array.isArray(userVehicles) ? userVehicles : [];
-      const crewVehiclesArray = Array.isArray(crewVehicles) ? crewVehicles : [];
+      const allVehicles = [...userResult.vehicles, ...crewResult.vehicles];
       
-      const allVehicles = [...userVehiclesArray, ...crewVehiclesArray];
-      
+      // Remove duplicates based on vehicle ID
       const uniqueVehicles = allVehicles.filter((vehicle, index, self) =>
         index === self.findIndex(v => v.id === vehicle.id)
       );
 
-      setVehicleTypes(uniqueVehicles);
+      if (append) {
+        setVehicleTypes(prev => {
+          const combined = [...prev, ...uniqueVehicles];
+          return combined.filter((vehicle, index, self) =>
+            index === self.findIndex(v => v.id === vehicle.id)
+          );
+        });
+      } else {
+        setVehicleTypes(uniqueVehicles);
+      }
+
+      setVehicleHasMore(userResult.hasMore || crewResult.hasMore);
+      setVehiclePage(page);
     } catch (error) {
       console.error('Failed to update vehicle types:', error);
-      setError('Failed to load vehicles');
+      if (!append) {
+        setError('Failed to load vehicles');
+      }
     } finally {
-      setLoading(false);
+      setVehicleLoading(false);
+    }
+  };
+
+  // Scroll handlers for pagination
+  const handleCrewScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    if (scrollHeight - scrollTop === clientHeight && crewHasMore && !crewLoading) {
+      fetchCrewMembers(crewPage + 1, true);
+    }
+  };
+
+  const handleVehicleScroll = (e) => {
+    const { scrollTop, scrollHeight, clientHeight } = e.target;
+    if (scrollHeight - scrollTop === clientHeight && vehicleHasMore && !vehicleLoading) {
+      updateVehicleTypes(vehiclePage + 1, true);
     }
   };
 
@@ -154,8 +216,8 @@ export default function PlanTripPage() {
       setLoading(true);
       try {
         await Promise.all([
-          fetchCrewMembers(),
-          updateVehicleTypes()
+          fetchCrewMembers(1, false),
+          updateVehicleTypes(1, false)
         ]);
       } catch (error) {
         setError('Failed to initialize data');
@@ -179,7 +241,7 @@ export default function PlanTripPage() {
     })();
   }, []);
 
-  // Choices.js setup
+  // Choices.js setup with scroll handling
   useEffect(() => {
     if (crewSelectRef.current && crewMembers.length > 0) {
       const ch = new Choices(crewSelectRef.current, {
@@ -190,17 +252,41 @@ export default function PlanTripPage() {
         },
       });
       
+      crewChoicesRef.current = ch;
+      
       const handleCrewChange = (e) => {
         const selectedIds = [...e.target.selectedOptions].map(o => +o.value);
         setTravellers(selectedIds);
       };
 
       crewSelectRef.current.addEventListener("change", handleCrewChange);
+
+      // Add scroll event listener to the dropdown
+      const choicesDropdown = ch.dropdown.element;
+      if (choicesDropdown) {
+        choicesDropdown.addEventListener('scroll', handleCrewScroll);
+      }
       
       return () => {
         crewSelectRef.current?.removeEventListener("change", handleCrewChange);
+        if (choicesDropdown) {
+          choicesDropdown.removeEventListener('scroll', handleCrewScroll);
+        }
         ch.destroy();
       };
+    }
+  }, [crewMembers, crewHasMore, crewLoading, crewPage]);
+
+  // Update Choices.js when new crew members are loaded
+  useEffect(() => {
+    if (crewChoicesRef.current && crewMembers.length > 0) {
+      const choices = crewMembers.map(member => ({
+        value: member.id,
+        label: member.name,
+        selected: travellers.includes(member.id)
+      }));
+      
+      crewChoicesRef.current.setChoices(choices, 'value', 'label', true);
     }
   }, [crewMembers]);
 
@@ -412,7 +498,7 @@ export default function PlanTripPage() {
               </option>
             ))}
           </select>
-          {loading && <small className="text-muted">Loading crew members...</small>}
+          {crewLoading && <small className="text-muted">Loading more crew members...</small>}
         </div>
 
         {/* Add Vehicle Button */}
@@ -431,7 +517,12 @@ export default function PlanTripPage() {
             <div className="row g-2">
               <div className="col-md-3">
                 <label>Type *</label>
-                <select className="form-select" value={v.vehicle} onChange={(e) => handleVehicleField(i, "vehicle", e.target.value)}>
+                <select 
+                  className="form-select" 
+                  value={v.vehicle} 
+                  onChange={(e) => handleVehicleField(i, "vehicle", e.target.value)}
+                  onScroll={handleVehicleScroll}
+                >
                   <option value="">Select</option>
                   {vehicleTypes.map((vt) => (
                     <option key={vt.id} value={vt.id}>
@@ -439,7 +530,7 @@ export default function PlanTripPage() {
                     </option>
                   ))}
                 </select>
-                {loading && <small className="text-muted">Loading vehicles...</small>}
+                {vehicleLoading && <small className="text-muted">Loading more vehicles...</small>}
               </div>
 
               <div className="col-md-3">

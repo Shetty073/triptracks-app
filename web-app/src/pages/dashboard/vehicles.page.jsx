@@ -20,6 +20,7 @@ export default function VehiclesPage() {
 
   const [errorMessage, setErrorMessage] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
+  const [activeTab, setActiveTab] = useState("my-vehicles");
 
   const cards = [
     { title: "Fuel Consumed", value: "1121 Litres", badgeText: "+0.8%", description: "Since Last Year" },
@@ -101,6 +102,33 @@ export default function VehiclesPage() {
           <Link to="/dashboard/vehicles/add" className="btn btn-primary col-6 col-lg-2 mb-3">Add a new vehicle</Link>
         </div>
 
+        {/* Alert Messages */}
+        {successMessage && (
+          <div className="row">
+            <div className="alert alert-success alert-dismissible fade show" role="alert">
+              {successMessage}
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => setSuccessMessage("")}
+              ></button>
+            </div>
+          </div>
+        )}
+        {errorMessage && (
+          <div className="row">
+            <div className="alert alert-danger alert-dismissible fade show" role="alert">
+              {errorMessage}
+              <button 
+                type="button" 
+                className="btn-close" 
+                onClick={() => setErrorMessage("")}
+              ></button>
+            </div>
+          </div>
+        )}
+
+        {/* Cards */}
         <div className="row">
           {cards.map((card, idx) => (
             <div className="col-12 col-md-4" key={idx}>
@@ -109,60 +137,126 @@ export default function VehiclesPage() {
           ))}
         </div>
 
+        {/* Tabs */}
         <div className="row">
           <div className="col-12">
-            {vehiclesLoading ? (
-              <div className="d-flex justify-content-center">
-                <div className="spinner-grow text-secondary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
-              </div>
-            ) : (userVehicles.length > 0) &&
-            <DashboardTable
-              title="My Vehicles"
-              data={userVehicles}
-              omitColumns={['updated_at', 'id']}
-              renameColumns={{'created_at': "Added On"}}
-              page={userPage}
-              totalPages={userTotalPages}
-              onPageChange={getUserVehicles}
-              actions={[
-                {
-                  label: "Remove",
-                  style: "danger",
-                  icon: "bx bx-list-minus",
-                  onClick: (row) => removeUserVehicle(row.id)
-                }
-              ]}
-            />
-            }
+            <ul className="nav nav-tabs" id="vehiclesTab" role="tablist">
+              <li className="nav-item" role="presentation">
+                <button
+                  className={`nav-link ${activeTab === "my-vehicles" ? "active" : ""}`}
+                  onClick={() => setActiveTab("my-vehicles")}
+                  type="button"
+                  role="tab"
+                >
+                  My Vehicles
+                  {userVehicleCount > 0 && (
+                    <span className="badge bg-secondary ms-2">{userVehicleCount}</span>
+                  )}
+                </button>
+              </li>
+              <li className="nav-item" role="presentation">
+                <button
+                  className={`nav-link ${activeTab === "crew-vehicles" ? "active" : ""}`}
+                  onClick={() => setActiveTab("crew-vehicles")}
+                  type="button"
+                  role="tab"
+                >
+                  Crew Vehicles
+                  {crewVehicleCount > 0 && (
+                    <span className="badge bg-secondary ms-2">{crewVehicleCount}</span>
+                  )}
+                </button>
+              </li>
+            </ul>
           </div>
         </div>
 
+        {/* Tab Content */}
         <div className="row">
           <div className="col-12">
-            {crewVehiclesLoading ? (
-              <div className="d-flex justify-content-center">
-                <div className="spinner-grow text-secondary" role="status">
-                  <span className="visually-hidden">Loading...</span>
-                </div>
+            <div className="tab-content" id="vehiclesTabContent">
+              {/* My Vehicles Tab */}
+              <div
+                className={`tab-pane fade ${activeTab === "my-vehicles" ? "show active" : ""}`}
+                role="tabpanel"
+              >
+                {vehiclesLoading ? (
+                  <div className="d-flex justify-content-center py-5">
+                    <div className="spinner-grow text-secondary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                ) : (userVehicles.length > 0) ? (
+                  <DashboardTable
+                    title="My Vehicles"
+                    data={userVehicles}
+                    omitColumns={['updated_at', 'id']}
+                    renameColumns={{'created_at': "Added On"}}
+                    page={userPage}
+                    totalPages={userTotalPages}
+                    onPageChange={getUserVehicles}
+                    actions={[
+                      {
+                        label: "Remove",
+                        style: "danger",
+                        icon: "bx bx-list-minus",
+                        onClick: (row) => removeUserVehicle(row.id),
+                        tooltip: "Remove this vehicle",
+                        tooltipPosition: "top"
+                      }
+                    ]}
+                  />
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="mb-3">
+                      <i className="bx bx-car display-1 text-muted"></i>
+                    </div>
+                    <h5 className="text-muted">No vehicles found</h5>
+                    <p className="text-muted">You haven't added any vehicles yet.</p>
+                    <Link to="/dashboard/vehicles/add" className="btn btn-primary">
+                      Add Your First Vehicle
+                    </Link>
+                  </div>
+                )}
               </div>
-            ) : (crewVehicles.length > 0) &&
-            <DashboardTable
-              title="Crew Vehicles"
-              data={crewVehicles}
-              omitColumns={['updated_at', 'id']}
-              renameColumns={{'created_at': "Added On"}}
-              page={crewPage}
-              totalPages={crewTotalPages}
-              onPageChange={getCrewVehicles}
-            />
-            }
+
+              {/* Crew Vehicles Tab */}
+              <div
+                className={`tab-pane fade ${activeTab === "crew-vehicles" ? "show active" : ""}`}
+                role="tabpanel"
+              >
+                {crewVehiclesLoading ? (
+                  <div className="d-flex justify-content-center py-5">
+                    <div className="spinner-grow text-secondary" role="status">
+                      <span className="visually-hidden">Loading...</span>
+                    </div>
+                  </div>
+                ) : (crewVehicles.length > 0) ? (
+                  <DashboardTable
+                    title="Crew Vehicles"
+                    data={crewVehicles}
+                    omitColumns={['updated_at', 'id']}
+                    renameColumns={{'created_at': "Added On"}}
+                    page={crewPage}
+                    totalPages={crewTotalPages}
+                    onPageChange={getCrewVehicles}
+                  />
+                ) : (
+                  <div className="text-center py-5">
+                    <div className="mb-3">
+                      <i className="bx bx-group display-1 text-muted"></i>
+                    </div>
+                    <h5 className="text-muted">No crew vehicles found</h5>
+                    <p className="text-muted">Your crew members haven't added any vehicles yet.</p>
+                    <Link to="/dashboard/crew" className="btn btn-outline-primary">
+                      Manage Crew Members
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
-
-        {successMessage && <div className="alert alert-success alert-dismissible fade show">{successMessage}</div>}
-        {errorMessage && <div className="alert alert-danger alert-dismissible fade show">{errorMessage}</div>}
       </div>
     </div>
   );
