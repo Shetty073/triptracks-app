@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
@@ -7,6 +7,8 @@ import haversine from "haversine-distance";
 
 import ModalMap from "../../components/modalmap.component";
 import usePermissionPrompt from "../../hooks/usePermissionPrompt";
+import axiosClient from "../../utils/axiosClient";
+import { ENDPOINTS } from "../../constants/urls";
 
 import Choices from "choices.js";
 import "choices.js/public/assets/styles/choices.min.css";
@@ -36,6 +38,7 @@ const destinationIcon = new L.Icon({
 });
 
 export default function PlanTripPage() {
+  const navigate = useNavigate();
   const [originName, setOriginName] = useState("");
   const [destinationName, setDestinationName] = useState("");
   const [originCoords, setOriginCoords] = useState(null);
@@ -52,22 +55,119 @@ export default function PlanTripPage() {
   const [showOriginMap, setShowOriginMap] = useState(false);
   const [showDestinationMap, setShowDestinationMap] = useState(false);
 
+  // New state for API data
+  const [crewMembers, setCrewMembers] = useState([]);
+  const [vehicleTypes, setVehicleTypes] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+
   const { requestPermission, PromptComponent } = usePermissionPrompt();
   const crewSelectRef = useRef(null);
 
-  const vehicleTypes = [
-    { id: 1, name: "SUV" },
-    { id: 2, name: "Sedan" },
-  ];
-
-  const crewMembers = [
-    { id: 2, name: "Alice" },
-    { id: 3, name: "Bob" },
-  ];
-
   const myself = { id: 1, name: "Myself" };
-  const fullCrewList = [myself, ...crewMembers];
 
+  // API call functions
+  const fetchCrewMembers = async () => {
+    try {
+      const response = await axiosClient.get(ENDPOINTS.FETCH_CREW_MEMBERS_FOR_CURRENT_USER);
+      if (response.status === 200 && response.data.success) {
+        const crewData = response.data.data.results || [];
+        const processedCrew = crewData.map(crew => ({
+          id: crew.requested_user.id,
+          name: `${crew.requested_user.first_name} ${crew.requested_user.last_name}`.trim(),
+          email: crew.requested_user.email,
+          username: crew.requested_user.username
+        }));
+        setCrewMembers(processedCrew);
+      } else {
+        console.error('Failed to fetch crew members:', response.data.message);
+        setError(response.data.message || 'Failed to load crew members');
+      }
+    } catch (error) {
+      console.error('Failed to fetch crew members:', error);
+      setError('Failed to load crew members');
+    }
+  };
+
+  const fetchUserVehicles = async () => {
+    try {
+      const response = await axiosClient.get(ENDPOINTS.GET_USER_VEHICLES);
+      if (response.status === 200 && response.data.success) {
+        const vehicles = response.data.data.results || [];
+        return vehicles;
+      } else {
+        console.error('Failed to fetch user vehicles:', response.data.message);
+        return [];
+      }
+    } catch (error) {
+      console.error('Failed to fetch user vehicles:', error);
+      return [];
+    }
+  };
+
+  const fetchCrewVehicles = async () => {
+    try {
+      const response = await axiosClient.get(ENDPOINTS.GET_USER_CREW_VEHICLES);
+      if (response.status === 200 && response.data.success) {
+        const vehicles = response.data.data.results || [];
+        return vehicles;
+      } else {
+        console.error('Failed to fetch crew vehicles:', response.data.message);
+        return [];
+      }
+    } catch (error) {
+      console.error('Failed to fetch crew vehicles:', error);
+      return [];
+    }
+  };
+
+  const updateVehicleTypes = async () => {
+    setLoading(true);
+    try {
+      const [userVehicles, crewVehicles] = await Promise.all([
+        fetchUserVehicles(),
+        fetchCrewVehicles()
+      ]);
+
+      const userVehiclesArray = Array.isArray(userVehicles) ? userVehicles : [];
+      const crewVehiclesArray = Array.isArray(crewVehicles) ? crewVehicles : [];
+      
+      const allVehicles = [...userVehiclesArray, ...crewVehiclesArray];
+      
+      const uniqueVehicles = allVehicles.filter((vehicle, index, self) =>
+        index === self.findIndex(v => v.id === vehicle.id)
+      );
+
+      setVehicleTypes(uniqueVehicles);
+    } catch (error) {
+      console.error('Failed to update vehicle types:', error);
+      setError('Failed to load vehicles');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initial data fetch
+  useEffect(() => {
+    const initializeData = async () => {
+      setLoading(true);
+      try {
+        await Promise.all([
+          fetchCrewMembers(),
+          updateVehicleTypes()
+        ]);
+      } catch (error) {
+        setError('Failed to initialize data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeData();
+  }, []);
+
+  // Location permission
   useEffect(() => {
     (async () => {
       const { granted, coords } = await requestPermission(
@@ -79,8 +179,9 @@ export default function PlanTripPage() {
     })();
   }, []);
 
+  // Choices.js setup
   useEffect(() => {
-    if (crewSelectRef.current) {
+    if (crewSelectRef.current && crewMembers.length > 0) {
       const ch = new Choices(crewSelectRef.current, {
         removeItemButton: true,
         searchEnabled: true,
@@ -88,12 +189,20 @@ export default function PlanTripPage() {
           containerInner: "form-control",
         },
       });
-      crewSelectRef.current.addEventListener("change", (e) => {
-        setTravellers([...e.target.selectedOptions].map((o) => +o.value));
-      });
-      return () => ch.destroy();
+      
+      const handleCrewChange = (e) => {
+        const selectedIds = [...e.target.selectedOptions].map(o => +o.value);
+        setTravellers(selectedIds);
+      };
+
+      crewSelectRef.current.addEventListener("change", handleCrewChange);
+      
+      return () => {
+        crewSelectRef.current?.removeEventListener("change", handleCrewChange);
+        ch.destroy();
+      };
     }
-  }, []);
+  }, [crewMembers]);
 
   const computeDistance = (a, b) => {
     const d = haversine(a, b) / 1000;
@@ -128,11 +237,11 @@ export default function PlanTripPage() {
     return used;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const errors = [];
     if (!originName || !originCoords) errors.push("Origin");
     if (!destinationName || !destinationCoords) errors.push("Destination");
-    if (!averagePerDay || !accommodationCost || !foodCost) errors.push("Trip details");
+    if (!distance || !averagePerDay || !accommodationCost || !foodCost) errors.push("Trip details");
     if (travellers.length === 0) errors.push("Crew");
 
     const vehicles = vehiclesData.map((v, i) => {
@@ -181,14 +290,55 @@ export default function PlanTripPage() {
       travellers,
     };
 
-    console.log("📦 Payload:", JSON.stringify(payload, null, 2));
+    try {
+      setSubmitting(true);
+      setError(null);
+      
+      const response = await axiosClient.post('/trip/api/trip/', payload);
+      
+      if (response.status === 201 && response.data.success) {
+        console.log('Trip created successfully:', response.data);
+        navigate('/dashboard/trips');
+      } else {
+        setError(response.data.message || 'Failed to create trip');
+      }
+    } catch (error) {
+      console.error('Error creating trip:', error);
+      setError(error.response?.data?.message || 'Failed to create trip');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const usedMembers = getUsedMembers();
+  const fullCrewList = [myself, ...crewMembers];
+
+  if (loading && crewMembers.length === 0) {
+    return (
+      <div className="container py-4">
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-4">
       {PromptComponent}
+      
+      {error && (
+        <div className="alert alert-danger alert-dismissible fade show">
+          {error}
+          <button 
+            className="btn-close" 
+            onClick={() => setError(null)}
+          />
+        </div>
+      )}
+
       {locationAccessDenied && (
         <div className="alert alert-warning alert-dismissible fade show">
           Location denied — using default center.
@@ -229,8 +379,14 @@ export default function PlanTripPage() {
         {originCoords && destinationCoords && (
           <>
             <div className="col-md-4">
-              <label>Distance</label>
-              <input className="form-control" readOnly value={distance} />
+              <label>Distance *</label>
+              <input 
+                type="number" 
+                className="form-control" 
+                value={distance} 
+                onChange={(e) => setDistance(e.target.value)}
+                placeholder="Enter distance"
+              />
             </div>
             <div className="col-md-4">
               <label>Unit</label>
@@ -246,14 +402,17 @@ export default function PlanTripPage() {
           </>
         )}
 
-        {/* Crew Selection (excluding "Myself") */}
+        {/* Crew Selection */}
         <div className="col-12">
           <label>Crew (select) *</label>
-          <select multiple ref={crewSelectRef} defaultValue={travellers} className="form-control">
+          <select multiple ref={crewSelectRef} className="form-control">
             {crewMembers.map((m) => (
-              <option key={m.id} value={m.id}>{m.name}</option>
+              <option key={m.id} value={m.id}>
+                {m.name}
+              </option>
             ))}
           </select>
+          {loading && <small className="text-muted">Loading crew members...</small>}
         </div>
 
         {/* Add Vehicle Button */}
@@ -275,9 +434,12 @@ export default function PlanTripPage() {
                 <select className="form-select" value={v.vehicle} onChange={(e) => handleVehicleField(i, "vehicle", e.target.value)}>
                   <option value="">Select</option>
                   {vehicleTypes.map((vt) => (
-                    <option key={vt.id} value={vt.id}>{vt.name}</option>
+                    <option key={vt.id} value={vt.id}>
+                      {vt.name} - {vt.make} {vt.model} ({vt.type})
+                    </option>
                   ))}
                 </select>
+                {loading && <small className="text-muted">Loading vehicles...</small>}
               </div>
 
               <div className="col-md-3">
@@ -332,8 +494,19 @@ export default function PlanTripPage() {
         </div>
 
         <div className="col-12 mt-4">
-          <button className="btn btn-success w-100" onClick={handleSubmit}>
-            Submit Trip
+          <button 
+            className="btn btn-success w-100" 
+            onClick={handleSubmit}
+            disabled={loading || submitting}
+          >
+            {submitting ? (
+              <>
+                <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                Creating Trip...
+              </>
+            ) : (
+              "Submit Trip"
+            )}
           </button>
         </div>
       </div>
