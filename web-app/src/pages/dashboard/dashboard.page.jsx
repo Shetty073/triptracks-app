@@ -4,12 +4,13 @@ import SideNav from '../../components/sidenav.component';
 import TopNav from '../../components/topnav.component';
 import Footer from '../../components/footer.component';
 import TripsPage from './trips.page';
-import FormsPage from './forms.page';
+import TripDetailsPage from './trip_details.page';
 import PlanTripPage from './plan_trips.page';
 import AddVehiclePage from './add_vehicle.page';
 import VehiclesPage from './vehicles.page';
 import AddCrewPage from './add_crew.page';
 import CrewPage from './crew.page';
+import FormsPage from './forms.page';
 
 export default function DashboardPage() {
   useEffect(() => {
@@ -46,6 +47,8 @@ export default function DashboardPage() {
 
             <Route path="/crew" element={<CrewPage />} />
             <Route path="/crew/add" element={<AddCrewPage />} />
+
+            <Route path="/trips/detail" element={<TripDetailsPage />} />
 
             <Route path="/forms" element={<FormsPage />} />
           </Routes>

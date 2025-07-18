@@ -19,4 +19,9 @@ export const ENDPOINTS = {
   REMOVE_USER_VEHICLE: '/vehicle/api/vehicle/',
   GET_USER_VEHICLES: '/vehicle/api/vehicle/',
   GET_USER_CREW_VEHICLES: '/vehicle/api/vehicle/crew/',
+
+  // Trips module
+  PLAN_NEW_TRIP: '/trip/api/trip/',
+  GET_ALL_PLANNED_TRIPS: '/trip/api/trip/',
+  GET_TRIP_DETAILS: '/trip/api/trip/',
 };
