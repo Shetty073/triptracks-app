@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import DashboardCard from "../../components/dashboardCard.component";
 import DashboardTable from "../../components/dashboardTable.component";
 import axiosClient from "../../utils/axiosClient";
 import { ENDPOINTS } from "../../constants/urls";
 
 export default function TripsPage() {
+  const navigate = useNavigate();
   const [tripsLoading, setTripsLoading] = useState(false);
   const [tripsData, setTripsData] = useState([]);
   const [errorMessage, setErrorMessage] = useState("");
@@ -52,13 +53,6 @@ export default function TripsPage() {
           origin_location: trip.origin_location,
           destination_location: trip.destination_location,
           distance: `${trip.distance} ${trip.distance_unit}`,
-          average_distance_per_day: `${trip.average_distance_per_day} ${trip.distance_unit}`,
-          accommodation_cost: `₹${trip.accomodation_cost_per_day}`,
-          food_cost: `₹${trip.food_cost_per_day}`,
-          total_fuel_cost: `₹${trip.vehicles.reduce((sum, vehicle) => sum + parseFloat(vehicle.calculated_fuel_cost || 0), 0).toFixed(2)}`,
-          travellers_count: trip.travellers.length,
-          vehicles_count: trip.vehicles.length,
-          created_at: trip.created_at,
           updated_at: trip.updated_at,
         }));
         
@@ -85,9 +79,7 @@ export default function TripsPage() {
   };
 
   const handleViewTrip = (trip) => {
-    console.log("View trip with ID:", trip.id);
-    // Future implementation: navigate to trip details page
-    // navigate(`/dashboard/trips/${trip.id}`);
+    navigate(`/dashboard/trips/detail?trip_id=${trip.id}`);
   };
 
   useEffect(() => {
@@ -177,17 +169,10 @@ export default function TripsPage() {
                       'origin_location': 'Origin',
                       'destination_location': 'Destination',
                       'distance': 'Distance',
-                      'average_distance_per_day': 'Daily Distance',
-                      'accommodation_cost': 'Accommodation/Day',
-                      'food_cost': 'Food/Day',
-                      'total_fuel_cost': 'Fuel Cost',
-                      'travellers_count': 'Travellers',
-                      'vehicles_count': 'Vehicles',
-                      'created_at': 'Created On',
                       'updated_at': 'Updated On'
                     }}
                     omitColumns={['id']}
-                    dateColumns={["created_at", "updated_at"]}
+                    dateColumns={["updated_at"]}
                     actions={[
                       {
                         label: "View",

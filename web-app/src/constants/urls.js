@@ -23,4 +23,5 @@ export const ENDPOINTS = {
   // Trips module
   PLAN_NEW_TRIP: '/trip/api/trip/',
   GET_ALL_PLANNED_TRIPS: '/trip/api/trip/',
+  GET_TRIP_DETAILS: '/trip/api/trip/',
 };

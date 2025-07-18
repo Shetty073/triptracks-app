@@ -86,7 +86,7 @@ export default function SideNav() {
         <NavItem icon="bx bx-trip" text="Trips" routeTo="/dashboard/trips" />
         <NavItem icon="bx bxs-car" text="Vehicles" routeTo="/dashboard/vehicles" />
         <NavItem icon="bx bxs-group" text="Crew" routeTo="/dashboard/crew" />
-        <NavItem icon="bx bxs-conversation" text="Messages" routeTo="/dashboard/forms" />
+        {/* <NavItem icon="bx bxs-conversation" text="Messages" routeTo="/dashboard/trips/detail" /> */}
         <DropdownNavItem icon="bx bxs-cog" title="Settings" targetId="auth">
           <NavItem text="My Profile" routeTo="/dashboard/forms" />
           <NavItem text="Analytics" routeTo="/dashboard/forms" />
